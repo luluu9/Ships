@@ -23,7 +23,7 @@ typedef struct Fleet {
 
 
 typedef struct Player {
-	int id;
+	int id = -1;
 	Fleet availableFleet;
 };
 
