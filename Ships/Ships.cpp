@@ -4,7 +4,7 @@
 #define BOARD_HEIGHT 21
 using namespace std;
 
-enum COMMANDS { PRINT, SET_FLEET, NEXT_PLAYER, PLACE_SHIP, SHOOT };
+enum COMMANDS { PRINT, SET_FLEET, NEXT_PLAYER, PLACE_SHIP, SHOOT, CLEAR };
 enum DIRECTIONS { NORTH, EAST, SOUTH, WEST };
 enum PLAYERS { ALICE, BOB }; // [A]lice = 0, [B]ob = 1
 enum SHIPS { CARRIER, BATTLESHIP, CRUISER, DESTROYER };
@@ -101,6 +101,7 @@ int getCommandId(string command) {
 	if (command == "PRINT") return PRINT;
 	if (command == "PLACE_SHIP") return PLACE_SHIP;
 	if (command == "SHOOT") return SHOOT;
+	if (command == "CLEAR") return CLEAR;
 	cout << "GOT BAD COMMAND IN getCommandId FUNCTION" << endl;
 	return -1;
 }
@@ -171,13 +172,12 @@ bool placeShip(char board[21][10], Player player, int y, int x, int direction, i
 }
 
 
-void fillBoard(char board[21][10]) {
+void prepareBoard(char board[21][10]) {
 	for (int y = 0; y < BOARD_HEIGHT; y++) {
 		for (int x = 0; x < BOARD_WIDTH; x++) {
 			if (y == DIVIDING_LINE) board[y][x] = '-'; // to visualize border
 			else board[y][x] = ' ';
 		}
-		cout << endl;
 	}
 }
 
@@ -192,7 +192,7 @@ void fillBoard(char board[21][10]) {
 int main()
 {
 	char board[BOARD_HEIGHT][BOARD_WIDTH];
-	fillBoard(board);
+	prepareBoard(board);
 
 	Player Players[2] = {}; // Problems with Designated Initializers
 	Players[0].id = ALICE;
@@ -230,6 +230,10 @@ int main()
 			break;
 		}
 		case SHOOT: {
+			break;
+		}
+		case CLEAR: {
+			prepareBoard(board);
 			break;
 		}
 		default:

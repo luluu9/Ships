@@ -19,4 +19,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Users\Mateusz\Downloads\Ships 2021-11-07(1).pdf">
+      <Filter>Source Files</Filter>
+    </None>
+  </ItemGroup>
 </Project>
