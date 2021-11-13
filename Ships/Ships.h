@@ -1,7 +1,7 @@
 #ifndef SHIPS
 #define SHIPS
 
-enum COMMANDS { PRINT, SET_FLEET, NEXT_PLAYER, PLACE_SHIP, SHOOT, CLEAR };
+enum COMMANDS { DO_NOTHING, PRINT, SET_FLEET, NEXT_PLAYER, PLACE_SHIP, SHOOT, CLEAR };
 enum DIRECTIONS { NORTH, EAST, SOUTH, WEST };
 enum PLAYERS { ALICE, BOB }; // [A]lice = 0, [B]ob = 1
 enum SHIPS { CARRIER, BATTLESHIP, CRUISER, DESTROYER };
@@ -12,6 +12,7 @@ const int BOARD_HEIGHT = 21;
 
 const char SHIP_CHAR = '+';
 const char DAMAGED_CHAR = 'x';
+const char DIVIDING_LINE_CHAR = ' ';
 
 // default ships with their number for each player
 typedef struct Fleet {

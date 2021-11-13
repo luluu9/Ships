@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 #include "Ships.h"
 
 using namespace std;
@@ -8,7 +9,7 @@ using namespace std;
 
 // check if player can put ship in specified place
 bool checkPlace(int playerId, int startX, int endX, int startY, int endY) {
-	
+
 	// check if its player's part of board
 	if (playerId == 0) {
 		if (startY >= DIVIDING_LINE || endY >= DIVIDING_LINE) // ship exceded forbidden line
@@ -40,7 +41,7 @@ bool placeShip(char board[21][10], Player player, int x, int y, int direction, i
 	int startX = x, endX = x, startY = y, endY = y;
 
 	// -1 because startY takes one cell
-	if (direction == NORTH) endY = y + shipLength - 1; 
+	if (direction == NORTH) endY = y + shipLength - 1;
 	else if (direction == SOUTH) endY = y - shipLength - 1;
 	else if (direction == EAST) endX = x - shipLength - 1;
 	else if (direction == WEST) endX = x + shipLength - 1;
@@ -148,23 +149,64 @@ int getShipLength(int shipTypeId) {
 
 
 // BOARD
-void prepareBoard(char board[21][10]) {
+void prepareBoard(char board[BOARD_HEIGHT][BOARD_WIDTH]) {
 	for (int y = 0; y < BOARD_HEIGHT; y++) {
 		for (int x = 0; x < BOARD_WIDTH; x++) {
-			if (y == DIVIDING_LINE) board[y][x] = '-'; // to visualize border
+			if (y == DIVIDING_LINE) board[y][x] = DIVIDING_LINE_CHAR; // to visualize border
 			else board[y][x] = ' ';
 		}
 	}
 }
 
 
-void printBoard(char board[21][10]) {
+void printBoard(char board[BOARD_HEIGHT][BOARD_WIDTH], int printMode) {
 	for (int y = 0; y < BOARD_HEIGHT; y++) {
 		for (int x = 0; x < BOARD_WIDTH; x++) {
 			cout << board[y][x];
 		}
 		cout << endl;
 	}
+
+
+// HANDLE INPUT
+
+int handleInput(string command) {
+	static bool stateCommands = false;
+	static bool playerACommands = false;
+	static bool playerBCommands = false;
+
+	if (command == "[state]")
+		stateCommands = !stateCommands; // flip bool
+	else if (command == "[playerA]")
+		playerACommands = !playerACommands;
+	else if (command == "[playerB]")
+		playerBCommands = !playerBCommands;
+	else {
+		if (stateCommands + playerACommands + playerBCommands > 1) {
+			// two commands simultaneous, what to do?
+		}
+
+		//printf("state: %s\n", stateCommands ? "true" : "false");
+		//printf("playerA: %s\n", playerACommands ? "true" : "false");
+		//printf("playerB: %s\n", playerBCommands ? "true" : "false");
+		//printf("sum: %d\n", stateCommands + playerACommands + playerBCommands);
+
+		int commandId = getCommandId(command);
+
+		if (stateCommands) {
+			if (commandId == PRINT ||
+				commandId == SET_FLEET ||
+				commandId == NEXT_PLAYER)
+				return commandId;
+		}
+		else {
+			if (commandId == PLACE_SHIP ||
+				commandId == SHOOT)
+				return commandId;
+		}
+		return -1;
+	}
+	return DO_NOTHING;
 }
 
 
@@ -190,9 +232,11 @@ int main()
 	char playerInitials;
 
 	while (cin >> command) {
-		switch (getCommandId(command)) {
+		switch (handleInput(command)) {
 		case PRINT: {
-			printBoard(board);
+			int printMode;
+			cin >> printMode;
+			printBoard(board, printMode);
 			break;
 		}
 		case SET_FLEET: {
@@ -220,6 +264,9 @@ int main()
 		}
 		case CLEAR: {
 			prepareBoard(board);
+			break;
+		}
+		case DO_NOTHING: {
 			break;
 		}
 		default:
