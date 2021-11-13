@@ -29,6 +29,7 @@ typedef struct Player {
 };
 
 void prepareBoard(char board[BOARD_HEIGHT][BOARD_WIDTH]);
+int countPartsRemaining(int playerId, char board[BOARD_HEIGHT][BOARD_WIDTH]);
 
 bool checkPlace(int playerId, int startX, int endX, int startY, int endY);
 bool placeShip(char board[BOARD_HEIGHT][BOARD_WIDTH], Player player, int y, int x, int direction, int shipType);
