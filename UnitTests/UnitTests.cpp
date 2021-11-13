@@ -30,7 +30,7 @@ namespace BoardTests
 
 			for (int direction = NORTH; direction < WEST; direction++) {
 				prepareBoard(board);
-				bool is_placed = placeShip(board, testPlayer, shipPosY, shipPosX, direction, DESTROYER);
+				bool is_placed = placeShip(board, testPlayer, shipPosX, shipPosY, direction, DESTROYER);
 				int shipLength = getShipLength(DESTROYER);
 
 				Assert::AreEqual(is_placed, true);

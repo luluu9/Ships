@@ -36,7 +36,7 @@ bool checkPlace(int playerId, int startX, int endX, int startY, int endY) {
 // mo¿e byæ maks (mo¿emy zliczaæ ile by³o dotychczas)?
 // czy x, y odnosi siê do dzioba statku czy koñca (rufy)? 
 // (zak³adam ¿e rufy)
-bool placeShip(char board[21][10], Player player, int y, int x, int direction, int shipType) {
+bool placeShip(char board[21][10], Player player, int x, int y, int direction, int shipType) {
 	int shipLength = getShipLength(shipType);
 	int startX = x, endX = x, startY = y, endY = y;
 
@@ -201,7 +201,6 @@ int main()
 			break;
 		}
 		case NEXT_PLAYER: {
-			// currentPlayer = (currentPlayer + 1) % 2;
 			cin >> playerInitials;
 			currentPlayer = getPlayerId(playerInitials);
 			break;
@@ -212,7 +211,7 @@ int main()
 			char shipDir;
 			string shipType; // The classes are denoted by [CAR]RIER, [BAT]TLESHIP, [CRU]ISER, [DES]TROYER.
 			cin >> y >> x >> shipDir >> i >> shipType;
-			placeShip(board, playerPlacingShip, y, x, getDirectionId(shipDir), getShipTypeId(shipType));
+			placeShip(board, playerPlacingShip, x, y, getDirectionId(shipDir), getShipTypeId(shipType));
 			break;
 		}
 		case SHOOT: {
