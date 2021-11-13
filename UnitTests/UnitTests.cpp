@@ -19,5 +19,29 @@ namespace BoardTests
 			for (int i=0; i<SIZE_X; i++)
 				Assert::AreEqual(dirtyBoard[0][i], ' ');
 		}
+
+		TEST_METHOD(PlaceShipInEmptySpaceAllDirections)
+		{
+			const int SIZE_Y = 21, SIZE_X = 10;
+			char board[SIZE_Y][SIZE_X];
+			Player testPlayer;
+			testPlayer.id = 0;
+			int shipPosX = 5, shipPosY=5;
+
+			for (int direction = NORTH; direction < WEST; direction++) {
+				prepareBoard(board);
+				bool is_placed = placeShip(board, testPlayer, shipPosY, shipPosX, direction, DESTROYER);
+				int shipLength = getShipLength(DESTROYER);
+
+				Assert::AreEqual(is_placed, true);
+				for (int i = 0; i < shipLength; i++) {
+					if (direction == NORTH) Assert::AreEqual(board[shipPosY - i][shipPosX], SHIP_CHAR);
+					else if (direction == SOUTH) Assert::AreEqual(board[shipPosY + i][shipPosX], SHIP_CHAR);
+					else if (direction == EAST) Assert::AreEqual(board[shipPosY][shipPosX+1], SHIP_CHAR);
+					else if (direction == WEST) Assert::AreEqual(board[shipPosY][shipPosX-1], SHIP_CHAR);
+				}
+					
+			}
+		}
 	};
 }
