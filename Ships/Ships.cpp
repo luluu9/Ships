@@ -31,33 +31,34 @@ bool checkPlace(int playerId, int startX, int endX, int startY, int endY) {
 
 
 // places ship on the board if it is possible
+// x, y is the bow of the ship
 // czy i-th ship (shipId u mnie) trzeba sprawdzaæ? 
 // po co w ogóle to jest, jeœli wiemy ile statków 
 // mo¿e byæ maks (mo¿emy zliczaæ ile by³o dotychczas)?
-// czy x, y odnosi siê do dzioba statku czy koñca (rufy)? 
-// (zak³adam ¿e rufy)
 bool placeShip(char board[21][10], Player player, int x, int y, int direction, int shipType) {
 	int shipLength = getShipLength(shipType);
 	int startX = x, endX = x, startY = y, endY = y;
 
-	if (direction == NORTH) endY = y - shipLength;
-	else if (direction == SOUTH) endY = y + shipLength;
-	else if (direction == EAST) endX = x + shipLength;
-	else if (direction == WEST) endX = x - shipLength;
+	// -1 because startY takes one cell
+	if (direction == NORTH) endY = y + shipLength - 1; 
+	else if (direction == SOUTH) endY = y - shipLength - 1;
+	else if (direction == EAST) endX = x - shipLength - 1;
+	else if (direction == WEST) endX = x + shipLength - 1;
 	else {
 		cout << "BAD DIRECTION PROVIDED PLACE_SHIP COMMAND" << endl;
 		return false;
 	}
 
-	if (!checkPlace(player.id, startX, endX, startY, endY))
+	if (!checkPlace(player.id, startX, endX, startY, endY)) {
 		// invalid position for ship
 		return false;
+	}
 
 	for (int i = 0; i < shipLength; i++) {
-		if (direction == NORTH) board[startY - i][startX] = SHIP_CHAR;
-		else if (direction == SOUTH) board[startY + i][startX] = SHIP_CHAR;
-		else if (direction == EAST) board[startY][startX + i] = SHIP_CHAR;
-		else if (direction == WEST) board[startY][startX - i] = SHIP_CHAR;
+		if (direction == NORTH) board[startY + i][startX] = SHIP_CHAR;
+		else if (direction == SOUTH) board[startY - i][startX] = SHIP_CHAR;
+		else if (direction == EAST) board[startY][startX - i] = SHIP_CHAR;
+		else if (direction == WEST) board[startY][startX + i] = SHIP_CHAR;
 	}
 
 	return true;
