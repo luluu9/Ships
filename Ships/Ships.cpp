@@ -42,8 +42,8 @@ bool placeShip(char board[21][10], Player player, int x, int y, int direction, i
 
 	// -1 because startY takes one cell
 	if (direction == NORTH) endY = y + shipLength - 1;
-	else if (direction == SOUTH) endY = y - shipLength - 1;
-	else if (direction == EAST) endX = x - shipLength - 1;
+	else if (direction == SOUTH) endY = y - shipLength + 1;
+	else if (direction == EAST) endX = x - shipLength + 1;
 	else if (direction == WEST) endX = x + shipLength - 1;
 	else {
 		cout << "BAD DIRECTION PROVIDED PLACE_SHIP COMMAND" << endl;
