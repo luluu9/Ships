@@ -187,7 +187,7 @@ int countPartsRemaining(int playerId, char board[BOARD_HEIGHT][BOARD_WIDTH]) {
 
 // HANDLE INPUT
 
-int handleInput(string command) {
+int handleInput(string command, int* currentStatePlayer) {
 	static bool stateCommands = false;
 	static bool playerACommands = false;
 	static bool playerBCommands = false;
@@ -203,11 +203,9 @@ int handleInput(string command) {
 			// two commands simultaneous, what to do?
 		}
 
-		//printf("state: %s\n", stateCommands ? "true" : "false");
-		//printf("playerA: %s\n", playerACommands ? "true" : "false");
-		//printf("playerB: %s\n", playerBCommands ? "true" : "false");
-		//printf("sum: %d\n", stateCommands + playerACommands + playerBCommands);
-
+		if (playerACommands) *currentStatePlayer = ALICE;
+		else if (playerBCommands) *currentStatePlayer = BOB;
+		
 		int commandId = getCommandId(command);
 
 		if (stateCommands) {
@@ -245,11 +243,12 @@ int main()
 	Players[1].id = BOB;
 
 	string command;
-	int currentPlayer = 0;
+	int currentPlayer = ALICE;
+	int currentStatePlayer = -1;
 	char playerInitials;
 
 	while (cin >> command) {
-		switch (handleInput(command)) {
+		switch (handleInput(command, &currentStatePlayer)) {
 		case PRINT: {
 			int printMode;
 			cin >> printMode;
@@ -268,7 +267,7 @@ int main()
 			break;
 		}
 		case PLACE_SHIP: {
-			Player playerPlacingShip = Players[currentPlayer];
+			Player playerPlacingShip = Players[currentStatePlayer];
 			int y, x, i; // is i variable neccessary?
 			char shipDir;
 			string shipType; // The classes are denoted by [CAR]RIER, [BAT]TLESHIP, [CRU]ISER, [DES]TROYER.
