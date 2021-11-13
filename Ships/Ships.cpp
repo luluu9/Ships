@@ -1,32 +1,10 @@
 #include <iostream>
-#define DIVIDING_LINE 10
-#define BOARD_WIDTH 10
-#define BOARD_HEIGHT 21
+#include "Ships.h"
+
 using namespace std;
 
-enum COMMANDS { PRINT, SET_FLEET, NEXT_PLAYER, PLACE_SHIP, SHOOT, CLEAR };
-enum DIRECTIONS { NORTH, EAST, SOUTH, WEST };
-enum PLAYERS { ALICE, BOB }; // [A]lice = 0, [B]ob = 1
-enum SHIPS { CARRIER, BATTLESHIP, CRUISER, DESTROYER };
 
-const char SHIP_CHAR = '+';
-const char DAMAGED_CHAR = 'x';
-
-
-// default ships with their number for each player
-typedef struct Fleet {
-	int carrier = 1;
-	int battleship = 2;
-	int cruiser = 3;
-	int destroyer = 4;
-};
-
-
-typedef struct Player {
-	int id = -1;
-	Fleet availableFleet;
-};
-
+// PLAYER
 
 // check if player can put ship in specified place
 bool checkPlace(int playerId, int startX, int endX, int startY, int endY) {
@@ -52,19 +30,43 @@ bool checkPlace(int playerId, int startX, int endX, int startY, int endY) {
 }
 
 
-// returns if shot hits
-bool shoot(int x, int y) {
+// places ship on the board if it is possible
+// czy i-th ship (shipId u mnie) trzeba sprawdzaæ? 
+// po co w ogóle to jest, jeœli wiemy ile statków 
+// mo¿e byæ maks (mo¿emy zliczaæ ile by³o dotychczas)?
+// czy x, y odnosi siê do dzioba statku czy koñca (rufy)? 
+// (zak³adam ¿e rufy)
+bool placeShip(char board[21][10], Player player, int y, int x, int direction, int shipType) {
+	int shipLength = getShipLength(shipType);
+	int startX = x, endX = x, startY = y, endY = y;
+
+	if (direction == NORTH) endY = y - shipLength;
+	else if (direction == SOUTH) endY = y + shipLength;
+	else if (direction == EAST) endX = x + shipLength;
+	else if (direction == WEST) endX = x - shipLength;
+	else {
+		cout << "BAD DIRECTION PROVIDED PLACE_SHIP COMMAND" << endl;
+		return false;
+	}
+
+	if (!checkPlace(player.id, startX, endX, startY, endY))
+		// invalid position for ship
+		return false;
+
+	for (int i = 0; i < shipLength; i++) {
+		if (direction == NORTH) board[startY - i][startX] = SHIP_CHAR;
+		else if (direction == SOUTH) board[startY + i][startX] = SHIP_CHAR;
+		else if (direction == EAST) board[startY][startX + i] = SHIP_CHAR;
+		else if (direction == WEST) board[startY][startX - i] = SHIP_CHAR;
+	}
+
 	return true;
 }
 
 
-void printBoard(char board[21][10]) {
-	for (int y = 0; y < BOARD_HEIGHT ; y++) {
-		for (int x = 0; x < BOARD_WIDTH; x++) {
-			cout << board[y][x];
-		}
-		cout << endl;
-	}
+// returns if shot hits
+bool shoot(int x, int y) {
+	return true;
 }
 
 
@@ -106,12 +108,14 @@ int getCommandId(string command) {
 	return -1;
 }
 
+
 int getPlayerId(char playerInitials) {
 	if (playerInitials == 'A') return ALICE;
 	if (playerInitials == 'B') return BOB;
 	cout << "GOT BAD PLAYER INITIALS IN getPlayerId FUNCTION" << endl;
 	return -1;
 }
+
 
 int getDirectionId(char dirAbbreviation) {
 	if (dirAbbreviation == 'N') return NORTH;
@@ -121,6 +125,7 @@ int getDirectionId(char dirAbbreviation) {
 	cout << "GOT BAD DIRECTION ABBREVIATION IN getDirectionId FUNCTION" << endl;
 	return -1;
 }
+
 
 int getShipTypeId(string shipTypeAbbreviation) {
 	if (shipTypeAbbreviation == "CAR") return CARRIER;
@@ -141,37 +146,7 @@ int getShipLength(int shipTypeId) {
 }
 
 
-// places ship on the board if it is possible
-// czy i-th ship (shipId u mnie) trzeba sprawdzaæ? 
-// po co w ogóle to jest, jeœli wiemy ile statków 
-// mo¿e byæ maks (mo¿emy zliczaæ ile by³o dotychczas)?
-// czy x, y odnosi siê do dzioba statku czy koñca (rufy)? 
-// (zak³adam ¿e rufy)
-bool placeShip(char board[21][10], Player player, int y, int x, int direction, int shipType) {
-	int shipLength = getShipLength(shipType);
-	int startX = x, endX = x, startY = y, endY = y;
-
-	if (direction == NORTH) endY = y - shipLength;
-	else if (direction == SOUTH) endY = y + shipLength;
-	else if (direction == EAST) endX = x + shipLength;
-	else if (direction == WEST) endX = x - shipLength;
-	else cout << "BAD DIRECTION PROVIDED PLACE_SHIP COMMAND" << endl;
-
-	if (!checkPlace(player.id, startX, endX, startY, endY))
-		// invalid position for ship
-		return false;
-
-	for (int i = 0; i < shipLength; i++) {
-		if (direction == NORTH) board[startY - i][startX] = SHIP_CHAR;
-		else if (direction == SOUTH) board[startY + i][startX] = SHIP_CHAR;
-		else if (direction == EAST) board[startY][startX + i] = SHIP_CHAR;
-		else if (direction == WEST) board[startY][startX - i] = SHIP_CHAR;
-	}
-
-	return true;
-}
-
-
+// BOARD
 void prepareBoard(char board[21][10]) {
 	for (int y = 0; y < BOARD_HEIGHT; y++) {
 		for (int x = 0; x < BOARD_WIDTH; x++) {
@@ -180,6 +155,17 @@ void prepareBoard(char board[21][10]) {
 		}
 	}
 }
+
+
+void printBoard(char board[21][10]) {
+	for (int y = 0; y < BOARD_HEIGHT; y++) {
+		for (int x = 0; x < BOARD_WIDTH; x++) {
+			cout << board[y][x];
+		}
+		cout << endl;
+	}
+}
+
 
 // Board visualisation:
 // 0 ... 9 (X-axis)
