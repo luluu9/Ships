@@ -9,11 +9,21 @@ using namespace std;
 
 struct Result {
 	const char* PLACE_SHIP[3] = {
-		"NOT IN STARTING POSITION", // invalidPosition
-		"SHIP ALREADY PRESENT", // shipAlreadyPresent
+		"NOT IN STARTING POSITION",          // invalidPosition
+		"SHIP ALREADY PRESENT",              // shipAlreadyPresent
 		"ALL SHIPS OF THE CLASS ALREADY SET" // shipsExcess
 	};
-	enum PLACE_SHIP_ENUM { undefined = -2, success = -1, invalidPosition, shipAlreadyPresent, shipsExcess };
+
+	const char* SHOOT[2] = {
+		"FIELD DOES NOT EXIST",
+		"NOT ALL SHIPS PLACED"
+	};
+
+	enum RESULTS {
+		undefined = -2, success = -1,								  // COMMON_RESULTS
+		invalidPosition = 0, shipAlreadyPresent = 1, shipsExcess = 2, // PLACE_SHIP_RESULTS
+		/*invalidPosition = 0,*/ notEnoughShips = 0                   // SHOOT_RESULTS
+	};
 
 
 } Result;
@@ -25,6 +35,12 @@ void printProblem(char* commandText, const char* problemText) {
 
 
 // PLAYER
+
+bool isPointInsideBoard(int x, int y) {
+	if (x < 0 || y < 0) return false;
+	if (x >= BOARD_WIDTH || y >= BOARD_HEIGHT ) return false;
+	return true;
+}
 
 // check if player can put ship in specified place
 bool checkPlace(int playerId, int startX, int endX, int startY, int endY) {
@@ -40,9 +56,8 @@ bool checkPlace(int playerId, int startX, int endX, int startY, int endY) {
 	}
 
 	// check borders
-	if (startX < 0 || endX < 0 || startY < 0 || endY < 0) return false;
-	if (startX >= BOARD_WIDTH || endX >= BOARD_WIDTH ||
-		startY >= BOARD_HEIGHT || endY >= BOARD_HEIGHT) return false;
+	if (!isPointInsideBoard(startX, startY)) return false;
+	if (!isPointInsideBoard(endX, endY)) return false;
 
 	// check collisions?
 
@@ -89,8 +104,13 @@ int placeShip(char board[BOARD_HEIGHT][BOARD_WIDTH], Player *player, int x, int 
 
 
 // returns if shot hits
-bool shoot(int x, int y) {
-	return true;
+// the shoot is at a position in the board (FIELD DOES NOT EXIST),
+// and that all ships that should be placed were already placed (NOT ALL SHIPS PLACED)
+int shoot(char board[BOARD_HEIGHT][BOARD_WIDTH], int x, int y) {
+	if (!isPointInsideBoard(x, y)) return Result.invalidPosition;
+	if (board[y][x] == SHIP_CHAR) board[y][x] = DAMAGED_CHAR;
+	
+	return Result.success;
 }
 
 
@@ -253,6 +273,8 @@ void handleResult(int commandId, int resultId, char* commandText) {
 			break;
 		}
 		case SHOOT: {
+			const char* problemText = Result.SHOOT[resultId];
+			printProblem(commandText, problemText);
 			break;
 		}
 	}
@@ -318,7 +340,12 @@ int main()
 			handleResult(PLACE_SHIP, result, commandBuffer);
 			break;
 		}
-		case SHOOT: {
+		case SHOOT: { // Shooting can only start if all the ships were placed.
+			int x, y;
+			cin >> y >> x;
+			sprintf_s(commandBuffer, "SHOOT %d %d",y, x);
+			int result = shoot(board, x, y);
+			handleResult(SHOOT, result, commandBuffer);
 			break;
 		}
 		case CLEAR: {
