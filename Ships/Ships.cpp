@@ -94,24 +94,14 @@ bool shoot(int x, int y) {
 // set number of each ship for player
 void setFleet(Player *player) {
 	int quantity;
-	for (int i = 0; i < 4; i++) {
+	for (int shipType = CARRIER; shipType <= DESTROYER; shipType++) {
 		cin >> quantity;
-		switch (i) {
-		case 0:
-			player->availableFleet->carrier = quantity;
-			break;
-		case 1:
-			player->availableFleet->battleship = quantity;
-			break;
-		case 2:
-			player->availableFleet->cruiser = quantity;
-			break;
-		case 3:
-			player->availableFleet->destroyer = quantity;
-			break;
-		default:
-			cout << "BAD INPUT FOR SET_FLEET COMMAND" << endl;
-		}
+		int actualShipsNumber = player->availableFleet->shipsNumber[shipType];
+		int actualShipsRemaining = player->availableFleet->shipsNumber[shipType];
+		int usedShipsNumber = actualShipsNumber - actualShipsRemaining;
+		
+		player->availableFleet->shipsNumber[shipType] = quantity;
+		player->availableFleet->remainingShips[shipType] = quantity-usedShipsNumber;
 	}
 }
 
@@ -281,9 +271,7 @@ int main()
 
 	Player Players[2] = {}; // Problems with Designated Initializers
 	Players[0].id = ALICE;
-	Players[0].availableFleet = new Fleet;
 	Players[1].id = BOB;
-	Players[1].availableFleet = new Fleet;
 
 
 	string command;

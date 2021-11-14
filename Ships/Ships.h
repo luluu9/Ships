@@ -14,28 +14,37 @@ const char SHIP_CHAR = '+';
 const char DAMAGED_CHAR = 'x';
 const char DIVIDING_LINE_CHAR = ' ';
 
+const int MAX_NUMBER_OF_SHIPS = 10;
+
 
 // default ships with their number for each player
 typedef struct Fleet {
-	int carrier = 1;
-	int battleship = 2;
-	int cruiser = 3;
-	int destroyer = 4;
+
+	// CARRIER, BATTLESHIP, CRUISER, DESTROYER 
+	// on corresponding to SHIPS enum indexes
+	int shipsNumber[4] = { 1, 2, 3, 4 };
+	int remainingShips[4] = { 1, 2, 3, 4 };
+	int shipUsedIds[4][MAX_NUMBER_OF_SHIPS] = { };
 
 	bool useShip(int shipType) {
-		if (shipType == CARRIER && carrier > 0) carrier -= 1;
-		else if (shipType == BATTLESHIP && battleship > 0) battleship -= 1;
-		else if (shipType == CRUISER && cruiser > 0) cruiser -= 1;
-		else if (shipType == DESTROYER && destroyer > 0) destroyer -= 1;
+		if (remainingShips[shipType] > 0) remainingShips[shipType] -= 1;
 		else return false;
 		return true;
+	}
+
+	bool isShipUsed(int shipType, int shipId) {
+		int usedShipsNumber = shipsNumber[shipType] - remainingShips[shipType];
+		for (int i = 0; i < usedShipsNumber; i++)
+			if (shipUsedIds[shipType][i] == shipId)
+				return true;
+		return false;
 	}
 };
 
 
 typedef struct Player {
 	int id = -1;
-	Fleet *availableFleet;
+	Fleet *availableFleet = new Fleet;
 };
 
 
