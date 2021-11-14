@@ -256,6 +256,7 @@ void handleResult(int commandId, int resultId, char* commandText) {
 			break;
 		}
 	}
+	exit(0);
 }
 
 
