@@ -55,7 +55,7 @@ bool checkPlace(int playerId, int startX, int endX, int startY, int endY) {
 // czy i-th ship (shipId u mnie) trzeba sprawdzaæ? 
 // po co w ogóle to jest, jeœli wiemy ile statków 
 // mo¿e byæ maks (mo¿emy zliczaæ ile by³o dotychczas)?
-int placeShip(char board[BOARD_HEIGHT][BOARD_WIDTH], Player player, int x, int y, int direction, int shipType) {
+int placeShip(char board[BOARD_HEIGHT][BOARD_WIDTH], Player *player, int x, int y, int direction, int shipType) {
 	int shipLength = getShipLength(shipType);
 	int startX = x, endX = x, startY = y, endY = y;
 
@@ -66,10 +66,13 @@ int placeShip(char board[BOARD_HEIGHT][BOARD_WIDTH], Player player, int x, int y
 	else if (direction == WEST) endX = x + shipLength - 1;
 	else return Result.undefined;
 
-	if (!checkPlace(player.id, startX, endX, startY, endY)) {
+	if (!checkPlace(player->id, startX, endX, startY, endY)) {
 		// invalid position for ship
 		return Result.invalidPosition;
 	}
+
+	int enoughShips = player->availableFleet->useShip(shipType);
+	if (!enoughShips) return Result.shipsExcess;
 
 	for (int i = 0; i < shipLength; i++) {
 		if (direction == NORTH) board[startY + i][startX] = SHIP_CHAR;
@@ -89,22 +92,22 @@ bool shoot(int x, int y) {
 
 
 // set number of each ship for player
-void setFleet(Player player) {
+void setFleet(Player *player) {
 	int quantity;
 	for (int i = 0; i < 4; i++) {
 		cin >> quantity;
 		switch (i) {
 		case 0:
-			player.availableFleet.carrier = quantity;
+			player->availableFleet->carrier = quantity;
 			break;
 		case 1:
-			player.availableFleet.battleship = quantity;
+			player->availableFleet->battleship = quantity;
 			break;
 		case 2:
-			player.availableFleet.cruiser = quantity;
+			player->availableFleet->cruiser = quantity;
 			break;
 		case 3:
-			player.availableFleet.destroyer = quantity;
+			player->availableFleet->destroyer = quantity;
 			break;
 		default:
 			cout << "BAD INPUT FOR SET_FLEET COMMAND" << endl;
@@ -278,7 +281,10 @@ int main()
 
 	Player Players[2] = {}; // Problems with Designated Initializers
 	Players[0].id = ALICE;
+	Players[0].availableFleet = new Fleet;
 	Players[1].id = BOB;
+	Players[1].availableFleet = new Fleet;
+
 
 	string command;
 	int currentPlayer = ALICE;
@@ -296,7 +302,7 @@ int main()
 		}
 		case SET_FLEET: {
 			cin >> playerInitials;
-			Player playerToSetFleet = Players[getPlayerId(playerInitials)];
+			Player *playerToSetFleet = &Players[getPlayerId(playerInitials)];
 			setFleet(playerToSetFleet);
 			break;
 		}
@@ -307,13 +313,13 @@ int main()
 		}
 		case PLACE_SHIP: {
 			Player playerPlacingShip = Players[currentStatePlayer];
-			int y, x, i; // is i variable neccessary?
+			int y, x, i;
 			char shipDir;
 			string shipType; // The classes are denoted by [CAR]RIER, [BAT]TLESHIP, [CRU]ISER, [DES]TROYER.
 			cin >> y >> x >> shipDir >> i >> shipType;
 			sprintf_s(commandBuffer, "PLACE_SHIP %d %d %c %d %s",
 				y, x, shipDir, i, shipType.c_str());
-			int result = placeShip(board, playerPlacingShip,
+			int result = placeShip(board, &playerPlacingShip,
 				x, y, getDirectionId(shipDir),
 				getShipTypeId(shipType));
 			handleResult(PLACE_SHIP, result, commandBuffer);
