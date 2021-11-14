@@ -149,10 +149,10 @@ int getShipTypeId(string shipTypeAbbreviation) {
 
 
 int getShipLength(int shipTypeId) {
-	if (shipTypeId == CARRIER) return 5;
-	if (shipTypeId == BATTLESHIP) return 4;
-	if (shipTypeId == CRUISER) return 3;
-	if (shipTypeId == DESTROYER) return 2;
+	if (shipTypeId == CARRIER) return CARRIER_LENGTH;
+	if (shipTypeId == BATTLESHIP) return BATTLESHIP_LENGTH;
+	if (shipTypeId == CRUISER) return CRUISER_LENGTH;
+	if (shipTypeId == DESTROYER) return DESTROYER_LENGTH;
 	cout << "GOT BAD SHIP TYPE ID IN getShipLength FUNCTION" << endl;
 	return -1;
 }

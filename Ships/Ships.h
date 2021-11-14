@@ -16,6 +16,11 @@ const char DIVIDING_LINE_CHAR = ' ';
 
 const int MAX_NUMBER_OF_SHIPS = 10;
 
+const int CARRIER_LENGTH = 5;
+const int BATTLESHIP_LENGTH = 4;
+const int CRUISER_LENGTH = 3;
+const int DESTROYER_LENGTH = 2;
+
 
 // default ships with their number for each player
 typedef struct Fleet {
