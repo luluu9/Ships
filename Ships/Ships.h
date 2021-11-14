@@ -57,7 +57,7 @@ void prepareBoard(char board[BOARD_HEIGHT][BOARD_WIDTH]);
 int countPartsRemaining(int playerId, char board[BOARD_HEIGHT][BOARD_WIDTH]);
 
 bool checkPlace(int playerId, int startX, int endX, int startY, int endY);
-int placeShip(char board[BOARD_HEIGHT][BOARD_WIDTH], Player *player, int x, int y, int direction, int shipType);
+int placeShip(char board[BOARD_HEIGHT][BOARD_WIDTH], Player *player, int x, int y, int shipId, int direction, int shipType);
 bool shoot(int x, int y);
 void setFleet(Player *player);
 

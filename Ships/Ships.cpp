@@ -55,7 +55,7 @@ bool checkPlace(int playerId, int startX, int endX, int startY, int endY) {
 // czy i-th ship (shipId u mnie) trzeba sprawdzaæ? 
 // po co w ogóle to jest, jeœli wiemy ile statków 
 // mo¿e byæ maks (mo¿emy zliczaæ ile by³o dotychczas)?
-int placeShip(char board[BOARD_HEIGHT][BOARD_WIDTH], Player *player, int x, int y, int direction, int shipType) {
+int placeShip(char board[BOARD_HEIGHT][BOARD_WIDTH], Player *player, int x, int y, int shipId, int direction, int shipType) {
 	int shipLength = getShipLength(shipType);
 	int startX = x, endX = x, startY = y, endY = y;
 
@@ -71,7 +71,10 @@ int placeShip(char board[BOARD_HEIGHT][BOARD_WIDTH], Player *player, int x, int 
 		return Result.invalidPosition;
 	}
 
-	int enoughShips = player->availableFleet->useShip(shipType);
+	bool shipAlreadyUsed = player->availableFleet->isShipUsed(shipType, shipId);
+	if (shipAlreadyUsed) return Result.shipAlreadyPresent;
+
+	bool enoughShips = player->availableFleet->useShip(shipType);
 	if (!enoughShips) return Result.shipsExcess;
 
 	for (int i = 0; i < shipLength; i++) {
@@ -301,14 +304,15 @@ int main()
 		}
 		case PLACE_SHIP: {
 			Player playerPlacingShip = Players[currentStatePlayer];
-			int y, x, i;
+			int y, x, shipId;
 			char shipDir;
 			string shipType; // The classes are denoted by [CAR]RIER, [BAT]TLESHIP, [CRU]ISER, [DES]TROYER.
-			cin >> y >> x >> shipDir >> i >> shipType;
+			cin >> y >> x >> shipDir >> shipId >> shipType;
 			sprintf_s(commandBuffer, "PLACE_SHIP %d %d %c %d %s",
-				y, x, shipDir, i, shipType.c_str());
+				y, x, shipDir, shipId, shipType.c_str());
 			int result = placeShip(board, &playerPlacingShip,
-				x, y, getDirectionId(shipDir),
+				x, y, shipId, 
+				getDirectionId(shipDir),
 				getShipTypeId(shipType));
 			handleResult(PLACE_SHIP, result, commandBuffer);
 			break;
