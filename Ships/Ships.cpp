@@ -16,11 +16,11 @@ struct Result {
 	enum PLACE_SHIP_ENUM { undefined = -2, success = -1, invalidPosition, shipAlreadyPresent, shipsExcess };
 
 
-} Problem;
+} Result;
 
 
-void printProblem(char* commandString, const char* problemText) {
-	cout << "INVALID OPERATION " << commandString << " SPECIFIED: " << problemText << endl;
+void printProblem(char* commandText, const char* problemText) {
+	cout << "INVALID OPERATION " << commandText << " SPECIFIED: " << problemText << endl;
 }
 
 
@@ -64,11 +64,11 @@ int placeShip(char board[BOARD_HEIGHT][BOARD_WIDTH], Player player, int x, int y
 	else if (direction == SOUTH) endY = y - shipLength + 1;
 	else if (direction == EAST) endX = x - shipLength + 1;
 	else if (direction == WEST) endX = x + shipLength - 1;
-	else return Problem.undefined;
+	else return Result.undefined;
 
 	if (!checkPlace(player.id, startX, endX, startY, endY)) {
 		// invalid position for ship
-		return Problem.invalidPosition;
+		return Result.invalidPosition;
 	}
 
 	for (int i = 0; i < shipLength; i++) {
@@ -78,7 +78,7 @@ int placeShip(char board[BOARD_HEIGHT][BOARD_WIDTH], Player player, int x, int y
 		else if (direction == WEST) board[startY][startX + i] = SHIP_CHAR;
 	}
 
-	return Problem.success;
+	return Result.success;
 }
 
 
@@ -240,21 +240,21 @@ int handleInput(string command, int* currentStatePlayer) {
 	return DO_NOTHING;
 }
 
-void handleResult(int commandId, int problemId, char* commandText) {
-	if (problemId == 1) return; // everything ok
+void handleResult(int commandId, int resultId, char* commandText) {
+	if (resultId == Result.success) return; // everything ok
 
 	switch (commandId) {
-	case SET_FLEET: {
-		break;
-	}
-	case PLACE_SHIP: {
-		const char* problemText = Problem.PLACE_SHIP[problemId];
-		printProblem(commandText, problemText);
-		break;
-	}
-	case SHOOT: {
-		break;
-	}
+		case SET_FLEET: {
+			break;
+		}
+		case PLACE_SHIP: {
+			const char* problemText = Result.PLACE_SHIP[resultId];
+			printProblem(commandText, problemText);
+			break;
+		}
+		case SHOOT: {
+			break;
+		}
 	}
 }
 
