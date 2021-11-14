@@ -5,6 +5,25 @@
 using namespace std;
 
 
+// COMMUNICATES
+
+struct Result {
+	const char* PLACE_SHIP[3] = {
+		"NOT IN STARTING POSITION", // invalidPosition
+		"SHIP ALREADY PRESENT", // shipAlreadyPresent
+		"ALL SHIPS OF THE CLASS ALREADY SET" // shipsExcess
+	};
+	enum PLACE_SHIP_ENUM { undefined = -2, success = -1, invalidPosition, shipAlreadyPresent, shipsExcess };
+
+
+} Problem;
+
+
+void printProblem(char* commandString, const char* problemText) {
+	cout << "INVALID OPERATION " << commandString << " SPECIFIED: " << problemText << endl;
+}
+
+
 // PLAYER
 
 // check if player can put ship in specified place
@@ -36,7 +55,7 @@ bool checkPlace(int playerId, int startX, int endX, int startY, int endY) {
 // czy i-th ship (shipId u mnie) trzeba sprawdzaæ? 
 // po co w ogóle to jest, jeœli wiemy ile statków 
 // mo¿e byæ maks (mo¿emy zliczaæ ile by³o dotychczas)?
-bool placeShip(char board[21][10], Player player, int x, int y, int direction, int shipType) {
+int placeShip(char board[BOARD_HEIGHT][BOARD_WIDTH], Player player, int x, int y, int direction, int shipType) {
 	int shipLength = getShipLength(shipType);
 	int startX = x, endX = x, startY = y, endY = y;
 
@@ -45,14 +64,11 @@ bool placeShip(char board[21][10], Player player, int x, int y, int direction, i
 	else if (direction == SOUTH) endY = y - shipLength + 1;
 	else if (direction == EAST) endX = x - shipLength + 1;
 	else if (direction == WEST) endX = x + shipLength - 1;
-	else {
-		cout << "BAD DIRECTION PROVIDED PLACE_SHIP COMMAND" << endl;
-		return false;
-	}
+	else return Problem.undefined;
 
 	if (!checkPlace(player.id, startX, endX, startY, endY)) {
 		// invalid position for ship
-		return false;
+		return Problem.invalidPosition;
 	}
 
 	for (int i = 0; i < shipLength; i++) {
@@ -62,7 +78,7 @@ bool placeShip(char board[21][10], Player player, int x, int y, int direction, i
 		else if (direction == WEST) board[startY][startX + i] = SHIP_CHAR;
 	}
 
-	return true;
+	return Problem.success;
 }
 
 
@@ -175,7 +191,7 @@ void printBoard(char board[BOARD_HEIGHT][BOARD_WIDTH], int printMode) {
 int countPartsRemaining(int playerId, char board[BOARD_HEIGHT][BOARD_WIDTH]) {
 	int startY = playerId == ALICE ? 0 : DIVIDING_LINE + 1;
 	int partsRemaining = 0;
-	for (int y = startY; y < startY+BOARD_HEIGHT/2; y++) {
+	for (int y = startY; y < startY + BOARD_HEIGHT / 2; y++) {
 		for (int x = 0; x < BOARD_WIDTH; x++) {
 			if (board[y][x] == SHIP_CHAR)
 				partsRemaining++;
@@ -205,7 +221,7 @@ int handleInput(string command, int* currentStatePlayer) {
 
 		if (playerACommands) *currentStatePlayer = ALICE;
 		else if (playerBCommands) *currentStatePlayer = BOB;
-		
+
 		int commandId = getCommandId(command);
 
 		if (stateCommands) {
@@ -222,6 +238,24 @@ int handleInput(string command, int* currentStatePlayer) {
 		return -1;
 	}
 	return DO_NOTHING;
+}
+
+void handleResult(int commandId, int problemId, char* commandText) {
+	if (problemId == 1) return; // everything ok
+
+	switch (commandId) {
+	case SET_FLEET: {
+		break;
+	}
+	case PLACE_SHIP: {
+		const char* problemText = Problem.PLACE_SHIP[problemId];
+		printProblem(commandText, problemText);
+		break;
+	}
+	case SHOOT: {
+		break;
+	}
+	}
 }
 
 
@@ -246,6 +280,7 @@ int main()
 	int currentPlayer = ALICE;
 	int currentStatePlayer = -1;
 	char playerInitials;
+	char commandBuffer[100];
 
 	while (cin >> command) {
 		switch (handleInput(command, &currentStatePlayer)) {
@@ -272,7 +307,12 @@ int main()
 			char shipDir;
 			string shipType; // The classes are denoted by [CAR]RIER, [BAT]TLESHIP, [CRU]ISER, [DES]TROYER.
 			cin >> y >> x >> shipDir >> i >> shipType;
-			placeShip(board, playerPlacingShip, x, y, getDirectionId(shipDir), getShipTypeId(shipType));
+			sprintf_s(commandBuffer, "PLACE_SHIP %d %d %c %d %s",
+				y, x, shipDir, i, shipType.c_str());
+			int result = placeShip(board, playerPlacingShip,
+				x, y, getDirectionId(shipDir),
+				getShipTypeId(shipType));
+			handleResult(PLACE_SHIP, result, commandBuffer);
 			break;
 		}
 		case SHOOT: {

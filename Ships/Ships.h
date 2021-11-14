@@ -14,6 +14,7 @@ const char SHIP_CHAR = '+';
 const char DAMAGED_CHAR = 'x';
 const char DIVIDING_LINE_CHAR = ' ';
 
+
 // default ships with their number for each player
 typedef struct Fleet {
 	int carrier = 1;
@@ -28,11 +29,12 @@ typedef struct Player {
 	Fleet availableFleet;
 };
 
+
 void prepareBoard(char board[BOARD_HEIGHT][BOARD_WIDTH]);
 int countPartsRemaining(int playerId, char board[BOARD_HEIGHT][BOARD_WIDTH]);
 
 bool checkPlace(int playerId, int startX, int endX, int startY, int endY);
-bool placeShip(char board[BOARD_HEIGHT][BOARD_WIDTH], Player player, int y, int x, int direction, int shipType);
+int placeShip(char board[BOARD_HEIGHT][BOARD_WIDTH], Player player, int x, int y, int direction, int shipType);
 bool shoot(int x, int y);
 void setFleet(Player player);
 
