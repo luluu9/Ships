@@ -20,7 +20,7 @@ struct Result {
 
 
 void printProblem(char* commandText, const char* problemText) {
-	cout << "INVALID OPERATION " << commandText << " SPECIFIED: " << problemText << endl;
+	cout << "INVALID OPERATION \"" << commandText << "\": " << problemText << endl;
 }
 
 
@@ -154,6 +154,7 @@ int getShipTypeId(string shipTypeAbbreviation) {
 	return -1;
 }
 
+
 int getShipLength(int shipTypeId) {
 	if (shipTypeId == CARRIER) return 5;
 	if (shipTypeId == BATTLESHIP) return 4;
@@ -176,14 +177,16 @@ void prepareBoard(char board[BOARD_HEIGHT][BOARD_WIDTH]) {
 
 
 void printBoard(char board[BOARD_HEIGHT][BOARD_WIDTH], int printMode) {
+	int partsRemainingPlayerA = countPartsRemaining(ALICE, board);
+	int partsRemainingPlayerB = countPartsRemaining(BOB, board);
+	if (partsRemainingPlayerA == 0 && partsRemainingPlayerB == 0)
+		return;
 	for (int y = 0; y < BOARD_HEIGHT; y++) {
 		for (int x = 0; x < BOARD_WIDTH; x++) {
 			cout << board[y][x];
 		}
 		cout << endl;
 	}
-	int partsRemainingPlayerA = countPartsRemaining(ALICE, board);
-	int partsRemainingPlayerB = countPartsRemaining(BOB, board);
 	printf("PARTS REMAINING:: A : %d B : %d\n", partsRemainingPlayerA, partsRemainingPlayerB);
 }
 
@@ -239,6 +242,7 @@ int handleInput(string command, int* currentStatePlayer) {
 	}
 	return DO_NOTHING;
 }
+
 
 void handleResult(int commandId, int resultId, char* commandText) {
 	if (resultId == Result.success) return; // everything ok
