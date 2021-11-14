@@ -29,8 +29,9 @@ namespace BoardTests
 			int shipPosX = 5, shipPosY = 5;
 
 			for (int direction = NORTH; direction < WEST; direction++) {
+				int shipId = direction;
 				prepareBoard(board);
-				bool is_placed = placeShip(board, testPlayer, shipPosX, shipPosY, direction, DESTROYER);
+				bool is_placed = placeShip(board, &testPlayer, shipPosX, shipPosY, shipId, direction, DESTROYER);
 				int shipLength = getShipLength(DESTROYER);
 
 				Assert::AreEqual(is_placed, true);
@@ -51,12 +52,13 @@ namespace BoardTests
 			int shipPosX = 0, shipPosY = 0;
 
 			for (int direction = NORTH; direction < WEST; direction++) {
+				int shipId = direction;
 				prepareBoard(board);
 				bool is_placed = true;
-				if (direction == NORTH) is_placed = placeShip(board, testPlayer, 0, DIVIDING_LINE - 1, direction, DESTROYER);
-				else if (direction == SOUTH) is_placed = placeShip(board, testPlayer, 0, 0, direction, DESTROYER);
-				else if (direction == EAST) is_placed = placeShip(board, testPlayer, 0, 0, direction, DESTROYER);
-				else if (direction == WEST) is_placed = placeShip(board, testPlayer, SIZE_X - 1, 0, direction, DESTROYER);
+				if (direction == NORTH) is_placed = placeShip(board, &testPlayer, 0, DIVIDING_LINE - 1, shipId, direction, DESTROYER);
+				else if (direction == SOUTH) is_placed = placeShip(board, &testPlayer, 0, 0, shipId, direction, DESTROYER);
+				else if (direction == EAST) is_placed = placeShip(board, &testPlayer, 0, 0, shipId, direction, DESTROYER);
+				else if (direction == WEST) is_placed = placeShip(board, &testPlayer, SIZE_X - 1, 0, shipId, direction, DESTROYER);
 				Assert::AreEqual(is_placed, false);
 			}
 		}
