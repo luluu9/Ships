@@ -24,7 +24,7 @@ const int DESTROYER_LENGTH = 2;
 
 
 // default ships with their number for each player
-typedef struct Fleet {
+struct Fleet {
 
 	// CARRIER, BATTLESHIP, CRUISER, DESTROYER 
 	// on corresponding to SHIPS enum indexes
@@ -38,7 +38,7 @@ typedef struct Fleet {
 		return true;
 	}
 
-	bool isShipUsed(int shipType, int shipId) {
+	bool isShipUsed(int shipType, int shipId) const {
 		int usedShipsNumber = shipsNumber[shipType] - remainingShips[shipType];
 		for (int i = 0; i < usedShipsNumber; i++)
 			if (shipUsedIds[shipType][i] == shipId)
@@ -46,7 +46,7 @@ typedef struct Fleet {
 		return false;
 	}
 
-	bool areAllShipsPlaced() {
+	bool areAllShipsPlaced() const {
 		for (int i = 0; i < NUMBER_OF_SHIP_TYPES; i++)
 			if (remainingShips[i] > 0) return false;
 		return true;
@@ -54,7 +54,7 @@ typedef struct Fleet {
 };
 
 
-typedef struct Player {
+struct Player {
 	int id = -1;
 	Fleet* availableFleet = new Fleet;
 };
@@ -65,7 +65,7 @@ int countPartsRemaining(int playerId, char board[BOARD_HEIGHT][BOARD_WIDTH]);
 
 bool checkPlace(int playerId, int startX, int endX, int startY, int endY);
 int placeShip(char board[BOARD_HEIGHT][BOARD_WIDTH], Player* player, int x, int y, int shipId, int direction, int shipType);
-int shoot(char board[BOARD_HEIGHT][BOARD_WIDTH], Player players[], int x, int y);
+int shoot(char board[BOARD_HEIGHT][BOARD_WIDTH], Player players[2], int x, int y);
 void setFleet(Player* player);
 
 int getCommandId(std::string command);

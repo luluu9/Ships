@@ -27,7 +27,7 @@ struct Result {
 	enum RESULTS {
 		undefined = -2, success = -1,								  // COMMON_RESULTS
 		invalidPosition = 0, shipAlreadyPresent = 1, shipsExcess = 2, // PLACE_SHIP_RESULTS
-		/* invalidPosition = 0, */ notEnoughShips = 1,                  // SHOOT_RESULTS
+		/* invalidPosition = 0, */ notEnoughShips = 1,                // SHOOT_RESULTS
 		otherPlayerExcepted = 0										  // STATE_RESULTS
 	};
 
@@ -52,7 +52,6 @@ bool isPointInsideBoard(int x, int y) {
 
 // check if player can put ship in specified place
 bool checkPlace(int playerId, int startX, int endX, int startY, int endY) {
-
 	// check if its player's part of board
 	if (playerId == 0) {
 		if (startY >= DIVIDING_LINE || endY >= DIVIDING_LINE) // ship exceded forbidden line
@@ -144,13 +143,13 @@ void setFleet(Player* player) {
 }
 
 
+
 // GETTERS - mo¿e da siê to ujednoliciæ do jednej krótkiej funkcji?
 
 int getCommandId(string command) {
 	if (command == "PRINT") return PRINT;
 	if (command == "SET_FLEET") return SET_FLEET;
 	if (command == "NEXT_PLAYER") return NEXT_PLAYER;
-	if (command == "PRINT") return PRINT;
 	if (command == "PLACE_SHIP") return PLACE_SHIP;
 	if (command == "SHOOT") return SHOOT;
 	if (command == "CLEAR") return CLEAR;
@@ -260,7 +259,7 @@ int checkWinner(Player players[2], char board[BOARD_HEIGHT][BOARD_WIDTH]) {
 // HANDLE INPUT/RESULT
 
 // returns true if turn ends
-bool switchPlayerTurn(int currentCommandPlayerId, bool *playerCommandsToChange, int* currentStatePlayer, int* previousStatePlayer) {
+bool switchPlayerTurn(int currentCommandPlayerId, bool* playerCommandsToChange, int* currentStatePlayer, int* previousStatePlayer) {
 	*playerCommandsToChange = !*playerCommandsToChange; // flip bool
 	if (*playerCommandsToChange) { // player starts turn
 		*previousStatePlayer = *currentStatePlayer;
@@ -273,7 +272,7 @@ bool switchPlayerTurn(int currentCommandPlayerId, bool *playerCommandsToChange, 
 }
 
 
-int handleInput(string command, int* currentStatePlayer, int *previousStatePlayer) {
+int handleInput(string command, int* currentStatePlayer, int* previousStatePlayer) {
 	static bool stateCommands = false;
 	static bool playerACommands = false;
 	static bool playerBCommands = false;
@@ -309,7 +308,6 @@ int handleInput(string command, int* currentStatePlayer, int *previousStatePlaye
 				commandId == SHOOT)
 				return commandId;
 		}
-		return -1;
 	}
 
 	if (turnEnds)
@@ -419,9 +417,6 @@ int main()
 			prepareBoard(board);
 			break;
 		}
-		case DO_NOTHING: {
-			break;
-		}
 		case OTHER_PLAYER_TURN: {
 			strcpy_s(commandBuffer, (currentStatePlayer == ALICE) ? "[playerA] " : "[playerB] ");
 			handleResult(STATE, Result.otherPlayerExcepted, commandBuffer);
@@ -433,7 +428,9 @@ int main()
 				printf("%c won", winner == ALICE ? 'A' : 'B');
 				exit(0);
 			}
-			
+			break;
+		}
+		case DO_NOTHING: {
 			break;
 		}
 		default:
