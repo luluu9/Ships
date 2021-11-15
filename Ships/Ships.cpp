@@ -5,6 +5,7 @@
 using namespace std;
 
 
+
 // COMMUNICATES
 
 struct Result {
@@ -22,7 +23,7 @@ struct Result {
 	enum RESULTS {
 		undefined = -2, success = -1,								  // COMMON_RESULTS
 		invalidPosition = 0, shipAlreadyPresent = 1, shipsExcess = 2, // PLACE_SHIP_RESULTS
-		/*invalidPosition = 0,*/ notEnoughShips = 0                   // SHOOT_RESULTS
+		/*invalidPosition = 0,*/ notEnoughShips = 1                   // SHOOT_RESULTS
 	};
 
 
@@ -34,13 +35,15 @@ void printProblem(char* commandText, const char* problemText) {
 }
 
 
+
 // PLAYER
 
 bool isPointInsideBoard(int x, int y) {
 	if (x < 0 || y < 0) return false;
-	if (x >= BOARD_WIDTH || y >= BOARD_HEIGHT ) return false;
+	if (x >= BOARD_WIDTH || y >= BOARD_HEIGHT) return false;
 	return true;
 }
+
 
 // check if player can put ship in specified place
 bool checkPlace(int playerId, int startX, int endX, int startY, int endY) {
@@ -65,12 +68,15 @@ bool checkPlace(int playerId, int startX, int endX, int startY, int endY) {
 }
 
 
+
+// COMMANDS
+
 // places ship on the board if it is possible
 // x, y is the bow of the ship
 // czy i-th ship (shipId u mnie) trzeba sprawdzaæ? 
 // po co w ogóle to jest, jeœli wiemy ile statków 
 // mo¿e byæ maks (mo¿emy zliczaæ ile by³o dotychczas)?
-int placeShip(char board[BOARD_HEIGHT][BOARD_WIDTH], Player *player, int x, int y, int shipId, int direction, int shipType) {
+int placeShip(char board[BOARD_HEIGHT][BOARD_WIDTH], Player* player, int x, int y, int shipId, int direction, int shipType) {
 	int shipLength = getShipLength(shipType);
 	int startX = x, endX = x, startY = y, endY = y;
 
@@ -106,30 +112,35 @@ int placeShip(char board[BOARD_HEIGHT][BOARD_WIDTH], Player *player, int x, int 
 // returns if shot hits
 // the shoot is at a position in the board (FIELD DOES NOT EXIST),
 // and that all ships that should be placed were already placed (NOT ALL SHIPS PLACED)
-int shoot(char board[BOARD_HEIGHT][BOARD_WIDTH], int x, int y) {
+int shoot(char board[BOARD_HEIGHT][BOARD_WIDTH], Player players[2], int x, int y) {
 	if (!isPointInsideBoard(x, y)) return Result.invalidPosition;
-	if (board[y][x] == SHIP_CHAR) board[y][x] = DAMAGED_CHAR;
-	
+	if (!players[ALICE].availableFleet->areAllShipsPlaced()) return Result.notEnoughShips;
+	if (!players[BOB].availableFleet->areAllShipsPlaced()) return Result.notEnoughShips;
+
+	if (board[y][x] == SHIP_CHAR)
+		board[y][x] = DAMAGED_CHAR;
+
 	return Result.success;
 }
 
 
 // set number of each ship for player
-void setFleet(Player *player) {
+void setFleet(Player* player) {
 	int quantity;
 	for (int shipType = CARRIER; shipType <= DESTROYER; shipType++) {
 		cin >> quantity;
 		int actualShipsNumber = player->availableFleet->shipsNumber[shipType];
 		int actualShipsRemaining = player->availableFleet->shipsNumber[shipType];
 		int usedShipsNumber = actualShipsNumber - actualShipsRemaining;
-		
+
 		player->availableFleet->shipsNumber[shipType] = quantity;
-		player->availableFleet->remainingShips[shipType] = quantity-usedShipsNumber;
+		player->availableFleet->remainingShips[shipType] = quantity - usedShipsNumber;
 	}
 }
 
 
 // GETTERS - mo¿e da siê to ujednoliciæ do jednej krótkiej funkcji?
+
 int getCommandId(string command) {
 	if (command == "PRINT") return PRINT;
 	if (command == "SET_FLEET") return SET_FLEET;
@@ -181,7 +192,9 @@ int getShipLength(int shipTypeId) {
 }
 
 
+
 // BOARD
+
 void prepareBoard(char board[BOARD_HEIGHT][BOARD_WIDTH]) {
 	for (int y = 0; y < BOARD_HEIGHT; y++) {
 		for (int x = 0; x < BOARD_WIDTH; x++) {
@@ -220,7 +233,7 @@ int countPartsRemaining(int playerId, char board[BOARD_HEIGHT][BOARD_WIDTH]) {
 }
 
 
-// HANDLE INPUT
+// HANDLE INPUT/RESULT
 
 int handleInput(string command, int* currentStatePlayer) {
 	static bool stateCommands = false;
@@ -264,19 +277,19 @@ void handleResult(int commandId, int resultId, char* commandText) {
 	if (resultId == Result.success) return; // everything ok
 
 	switch (commandId) {
-		case SET_FLEET: {
-			break;
-		}
-		case PLACE_SHIP: {
-			const char* problemText = Result.PLACE_SHIP[resultId];
-			printProblem(commandText, problemText);
-			break;
-		}
-		case SHOOT: {
-			const char* problemText = Result.SHOOT[resultId];
-			printProblem(commandText, problemText);
-			break;
-		}
+	case SET_FLEET: {
+		break;
+	}
+	case PLACE_SHIP: {
+		const char* problemText = Result.PLACE_SHIP[resultId];
+		printProblem(commandText, problemText);
+		break;
+	}
+	case SHOOT: {
+		const char* problemText = Result.SHOOT[resultId];
+		printProblem(commandText, problemText);
+		break;
+	}
 	}
 	exit(0);
 }
@@ -316,7 +329,7 @@ int main()
 		}
 		case SET_FLEET: {
 			cin >> playerInitials;
-			Player *playerToSetFleet = &Players[getPlayerId(playerInitials)];
+			Player* playerToSetFleet = &Players[getPlayerId(playerInitials)];
 			setFleet(playerToSetFleet);
 			break;
 		}
@@ -334,7 +347,7 @@ int main()
 			sprintf_s(commandBuffer, "PLACE_SHIP %d %d %c %d %s",
 				y, x, shipDir, shipId, shipType.c_str());
 			int result = placeShip(board, &playerPlacingShip,
-				x, y, shipId, 
+				x, y, shipId,
 				getDirectionId(shipDir),
 				getShipTypeId(shipType));
 			handleResult(PLACE_SHIP, result, commandBuffer);
@@ -343,8 +356,8 @@ int main()
 		case SHOOT: { // Shooting can only start if all the ships were placed.
 			int x, y;
 			cin >> y >> x;
-			sprintf_s(commandBuffer, "SHOOT %d %d",y, x);
-			int result = shoot(board, x, y);
+			sprintf_s(commandBuffer, "SHOOT %d %d", y, x);
+			int result = shoot(board, Players, x, y);
 			handleResult(SHOOT, result, commandBuffer);
 			break;
 		}

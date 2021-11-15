@@ -15,6 +15,7 @@ const char DAMAGED_CHAR = 'x';
 const char DIVIDING_LINE_CHAR = ' ';
 
 const int MAX_NUMBER_OF_SHIPS = 10;
+const int NUMBER_OF_SHIP_TYPES = 4;
 
 const int CARRIER_LENGTH = 5;
 const int BATTLESHIP_LENGTH = 4;
@@ -27,9 +28,9 @@ typedef struct Fleet {
 
 	// CARRIER, BATTLESHIP, CRUISER, DESTROYER 
 	// on corresponding to SHIPS enum indexes
-	int shipsNumber[4] = { 1, 2, 3, 4 };
-	int remainingShips[4] = { 1, 2, 3, 4 };
-	int shipUsedIds[4][MAX_NUMBER_OF_SHIPS] = { };
+	int shipsNumber[NUMBER_OF_SHIP_TYPES] = { 1, 2, 3, 4 };
+	int remainingShips[NUMBER_OF_SHIP_TYPES] = { 1, 2, 3, 4 };
+	int shipUsedIds[NUMBER_OF_SHIP_TYPES][MAX_NUMBER_OF_SHIPS] = { };
 
 	bool useShip(int shipType) {
 		if (remainingShips[shipType] > 0) remainingShips[shipType] -= 1;
@@ -44,12 +45,18 @@ typedef struct Fleet {
 				return true;
 		return false;
 	}
+
+	bool areAllShipsPlaced() {
+		for (int i = 0; i < NUMBER_OF_SHIP_TYPES; i++)
+			if (remainingShips[i] > 0) return false;
+		return true;
+	}
 };
 
 
 typedef struct Player {
 	int id = -1;
-	Fleet *availableFleet = new Fleet;
+	Fleet* availableFleet = new Fleet;
 };
 
 
@@ -57,9 +64,9 @@ void prepareBoard(char board[BOARD_HEIGHT][BOARD_WIDTH]);
 int countPartsRemaining(int playerId, char board[BOARD_HEIGHT][BOARD_WIDTH]);
 
 bool checkPlace(int playerId, int startX, int endX, int startY, int endY);
-int placeShip(char board[BOARD_HEIGHT][BOARD_WIDTH], Player *player, int x, int y, int shipId, int direction, int shipType);
-int shoot(char board[BOARD_HEIGHT][BOARD_WIDTH], int x, int y);
-void setFleet(Player *player);
+int placeShip(char board[BOARD_HEIGHT][BOARD_WIDTH], Player* player, int x, int y, int shipId, int direction, int shipType);
+int shoot(char board[BOARD_HEIGHT][BOARD_WIDTH], Player players[], int x, int y);
+void setFleet(Player* player);
 
 int getCommandId(std::string command);
 int getPlayerId(char playerInitials);
