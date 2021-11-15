@@ -239,16 +239,36 @@ int countPartsRemaining(int playerId, char board[BOARD_HEIGHT][BOARD_WIDTH]) {
 }
 
 
+int checkWinner(Player players[2], char board[BOARD_HEIGHT][BOARD_WIDTH]) {
+	// all ships have to be placed
+	bool playerAplacedAll = players[ALICE].availableFleet->areAllShipsPlaced();
+	bool playerBplacedAll = players[BOB].availableFleet->areAllShipsPlaced();
+	if (!(playerAplacedAll && playerBplacedAll))
+		return -1;
+
+	int playerAPartsRemaining = countPartsRemaining(ALICE, board);
+	int playerBPartsRemaining = countPartsRemaining(BOB, board);
+	if (playerBPartsRemaining == 0)
+		return ALICE;
+	else if (playerAPartsRemaining == 0)
+		return BOB;
+	return -1; // nobody wins
+}
+
+
 
 // HANDLE INPUT/RESULT
-void switchPlayerTurn(int currentCommandPlayerId, bool *playerCommandsToChange, int* currentStatePlayer, int* previousStatePlayer) {
+
+// returns true if turn ends
+bool switchPlayerTurn(int currentCommandPlayerId, bool *playerCommandsToChange, int* currentStatePlayer, int* previousStatePlayer) {
 	*playerCommandsToChange = !*playerCommandsToChange; // flip bool
 	if (*playerCommandsToChange) { // player starts turn
 		*previousStatePlayer = *currentStatePlayer;
 		*currentStatePlayer = currentCommandPlayerId;
+		return false;
 	}
 	else { // player ends turn
-		//pass
+		return true;
 	}
 }
 
@@ -257,14 +277,15 @@ int handleInput(string command, int* currentStatePlayer, int *previousStatePlaye
 	static bool stateCommands = false;
 	static bool playerACommands = false;
 	static bool playerBCommands = false;
+	int turnEnds = false;
 
 	if (command == "[state]")
 		stateCommands = !stateCommands; // flip bool
 	else if (command == "[playerA]") {
-		switchPlayerTurn(ALICE, &playerACommands, currentStatePlayer, previousStatePlayer);
+		turnEnds = switchPlayerTurn(ALICE, &playerACommands, currentStatePlayer, previousStatePlayer);
 	}
 	else if (command == "[playerB]") {
-		switchPlayerTurn(BOB, &playerACommands, currentStatePlayer, previousStatePlayer);
+		turnEnds = switchPlayerTurn(BOB, &playerBCommands, currentStatePlayer, previousStatePlayer);
 	}
 	else {
 		if (stateCommands + playerACommands + playerBCommands > 1) {
@@ -290,6 +311,9 @@ int handleInput(string command, int* currentStatePlayer, int *previousStatePlaye
 		}
 		return -1;
 	}
+
+	if (turnEnds)
+		return END_TURN;
 
 	return DO_NOTHING;
 }
@@ -371,12 +395,15 @@ int main()
 			char shipDir;
 			string shipType; // The classes are denoted by [CAR]RIER, [BAT]TLESHIP, [CRU]ISER, [DES]TROYER.
 			cin >> y >> x >> shipDir >> shipId >> shipType;
+
 			sprintf_s(commandBuffer, "PLACE_SHIP %d %d %c %d %s",
 				y, x, shipDir, shipId, shipType.c_str());
+
 			int result = placeShip(board, &playerPlacingShip,
 				x, y, shipId,
 				getDirectionId(shipDir),
 				getShipTypeId(shipType));
+
 			handleResult(PLACE_SHIP, result, commandBuffer);
 			break;
 		}
@@ -398,6 +425,16 @@ int main()
 		case OTHER_PLAYER_TURN: {
 			strcpy_s(commandBuffer, (currentStatePlayer == ALICE) ? "[playerA] " : "[playerB] ");
 			handleResult(STATE, Result.otherPlayerExcepted, commandBuffer);
+			break;
+		}
+		case END_TURN: {
+			int winner = checkWinner(Players, board);
+			if (winner == ALICE || winner == BOB) {
+				printf("%c won", winner == ALICE ? 'A' : 'B');
+				exit(0);
+			}
+			
+			break;
 		}
 		default:
 			cout << "INVALID COMMAND";
