@@ -1,5 +1,4 @@
 #include <iostream>
-#include <string>
 #include "Ships.h"
 
 using namespace std;
@@ -146,13 +145,13 @@ void setFleet(Player* player) {
 
 // GETTERS - mo¿e da siê to ujednoliciæ do jednej krótkiej funkcji?
 
-int getCommandId(string command) {
-	if (command == "PRINT") return PRINT;
-	if (command == "SET_FLEET") return SET_FLEET;
-	if (command == "NEXT_PLAYER") return NEXT_PLAYER;
-	if (command == "PLACE_SHIP") return PLACE_SHIP;
-	if (command == "SHOOT") return SHOOT;
-	if (command == "CLEAR") return CLEAR;
+int getCommandId(char *command) {
+	if (strcmp(command, "PRINT") == 0) return PRINT;
+	if (strcmp(command, "SET_FLEET") == 0) return SET_FLEET;
+	if (strcmp(command, "NEXT_PLAYER") == 0) return NEXT_PLAYER;
+	if (strcmp(command, "PLACE_SHIP") == 0) return PLACE_SHIP;
+	if (strcmp(command, "SHOOT") == 0) return SHOOT;
+	if (strcmp(command, "CLEAR") == 0) return CLEAR;
 	cout << "GOT BAD COMMAND IN getCommandId FUNCTION" << endl;
 	return -1;
 }
@@ -176,11 +175,11 @@ int getDirectionId(char dirAbbreviation) {
 }
 
 
-int getShipTypeId(string shipTypeAbbreviation) {
-	if (shipTypeAbbreviation == "CAR") return CARRIER;
-	if (shipTypeAbbreviation == "BAT") return BATTLESHIP;
-	if (shipTypeAbbreviation == "CRU") return CRUISER;
-	if (shipTypeAbbreviation == "DES") return DESTROYER;
+int getShipTypeId(char *shipTypeAbbreviation) {
+	if (strcmp(shipTypeAbbreviation, "CAR") == 0) return CARRIER;
+	if (strcmp(shipTypeAbbreviation, "BAT") == 0) return BATTLESHIP;
+	if (strcmp(shipTypeAbbreviation, "CRU") == 0) return CRUISER;
+	if (strcmp(shipTypeAbbreviation, "DES") == 0) return DESTROYER;
 	cout << "GOT BAD SHIP TYPE ABBREVIATION IN getShipTypeId FUNCTION" << endl;
 	return -1;
 }
@@ -272,18 +271,18 @@ bool switchPlayerTurn(int currentCommandPlayerId, bool* playerCommandsToChange, 
 }
 
 
-int handleInput(string command, int* currentStatePlayer, int* previousStatePlayer) {
+int handleInput(char* command, int* currentStatePlayer, int* previousStatePlayer) {
 	static bool stateCommands = false;
 	static bool playerACommands = false;
 	static bool playerBCommands = false;
 	int turnEnds = false;
 
-	if (command == "[state]")
+	if (strcmp(command, "[state]") == 0)
 		stateCommands = !stateCommands; // flip bool
-	else if (command == "[playerA]") {
+	else if (strcmp(command, "[playerA]") == 0) {
 		turnEnds = switchPlayerTurn(ALICE, &playerACommands, currentStatePlayer, previousStatePlayer);
 	}
-	else if (command == "[playerB]") {
+	else if (strcmp(command, "[playerB]") == 0) {
 		turnEnds = switchPlayerTurn(BOB, &playerBCommands, currentStatePlayer, previousStatePlayer);
 	}
 	else {
@@ -362,7 +361,7 @@ int main()
 	Players[1].id = BOB;
 
 
-	string command;
+	char command[100];
 	int previousStatePlayer = -2;
 	int currentStatePlayer = -1;
 	char playerInitials;
@@ -391,11 +390,11 @@ int main()
 			Player playerPlacingShip = Players[currentStatePlayer];
 			int y, x, shipId;
 			char shipDir;
-			string shipType; // The classes are denoted by [CAR]RIER, [BAT]TLESHIP, [CRU]ISER, [DES]TROYER.
+			char shipType[3]; // The classes are denoted by [CAR]RIER, [BAT]TLESHIP, [CRU]ISER, [DES]TROYER.
 			cin >> y >> x >> shipDir >> shipId >> shipType;
 
 			sprintf_s(commandBuffer, "PLACE_SHIP %d %d %c %d %s",
-				y, x, shipDir, shipId, shipType.c_str());
+				y, x, shipDir, shipId, shipType);
 
 			int result = placeShip(board, &playerPlacingShip,
 				x, y, shipId,

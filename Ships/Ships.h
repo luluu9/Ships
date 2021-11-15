@@ -68,10 +68,10 @@ int placeShip(char board[BOARD_HEIGHT][BOARD_WIDTH], Player* player, int x, int 
 int shoot(char board[BOARD_HEIGHT][BOARD_WIDTH], Player players[2], int x, int y);
 void setFleet(Player* player);
 
-int getCommandId(std::string command);
+int getCommandId(char* command);
 int getPlayerId(char playerInitials);
 int getDirectionId(char dirAbbreviation);
-int getShipTypeId(std::string shipTypeAbbreviation);
+int getShipTypeId(char* shipTypeAbbreviation);
 int getShipLength(int shipTypeId);
-
+	
 #endif
