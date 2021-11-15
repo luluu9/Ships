@@ -20,10 +20,15 @@ struct Result {
 		"NOT ALL SHIPS PLACED"
 	};
 
+	const char* STATE[1] = {
+		"THE OTHER PLAYER EXPECTED"
+	};
+
 	enum RESULTS {
 		undefined = -2, success = -1,								  // COMMON_RESULTS
 		invalidPosition = 0, shipAlreadyPresent = 1, shipsExcess = 2, // PLACE_SHIP_RESULTS
-		/*invalidPosition = 0,*/ notEnoughShips = 1                   // SHOOT_RESULTS
+		/* invalidPosition = 0, */ notEnoughShips = 1,                  // SHOOT_RESULTS
+		otherPlayerExcepted = 0										  // STATE_RESULTS
 	};
 
 
@@ -210,6 +215,7 @@ void printBoard(char board[BOARD_HEIGHT][BOARD_WIDTH], int printMode) {
 	int partsRemainingPlayerB = countPartsRemaining(BOB, board);
 	if (partsRemainingPlayerA == 0 && partsRemainingPlayerB == 0)
 		return;
+
 	for (int y = 0; y < BOARD_HEIGHT; y++) {
 		for (int x = 0; x < BOARD_WIDTH; x++) {
 			cout << board[y][x];
@@ -233,26 +239,41 @@ int countPartsRemaining(int playerId, char board[BOARD_HEIGHT][BOARD_WIDTH]) {
 }
 
 
-// HANDLE INPUT/RESULT
 
-int handleInput(string command, int* currentStatePlayer) {
+// HANDLE INPUT/RESULT
+void switchPlayerTurn(int currentCommandPlayerId, bool *playerCommandsToChange, int* currentStatePlayer, int* previousStatePlayer) {
+	*playerCommandsToChange = !*playerCommandsToChange; // flip bool
+	if (*playerCommandsToChange) { // player starts turn
+		*previousStatePlayer = *currentStatePlayer;
+		*currentStatePlayer = currentCommandPlayerId;
+	}
+	else { // player ends turn
+		//pass
+	}
+}
+
+
+int handleInput(string command, int* currentStatePlayer, int *previousStatePlayer) {
 	static bool stateCommands = false;
 	static bool playerACommands = false;
 	static bool playerBCommands = false;
 
 	if (command == "[state]")
 		stateCommands = !stateCommands; // flip bool
-	else if (command == "[playerA]")
-		playerACommands = !playerACommands;
-	else if (command == "[playerB]")
-		playerBCommands = !playerBCommands;
+	else if (command == "[playerA]") {
+		switchPlayerTurn(ALICE, &playerACommands, currentStatePlayer, previousStatePlayer);
+	}
+	else if (command == "[playerB]") {
+		switchPlayerTurn(BOB, &playerACommands, currentStatePlayer, previousStatePlayer);
+	}
 	else {
 		if (stateCommands + playerACommands + playerBCommands > 1) {
 			// two commands simultaneous, what to do?
+			return OTHER_PLAYER_TURN;
 		}
 
-		if (playerACommands) *currentStatePlayer = ALICE;
-		else if (playerBCommands) *currentStatePlayer = BOB;
+		if (*previousStatePlayer == *currentStatePlayer)
+			return OTHER_PLAYER_TURN;
 
 		int commandId = getCommandId(command);
 
@@ -269,6 +290,7 @@ int handleInput(string command, int* currentStatePlayer) {
 		}
 		return -1;
 	}
+
 	return DO_NOTHING;
 }
 
@@ -287,6 +309,11 @@ void handleResult(int commandId, int resultId, char* commandText) {
 	}
 	case SHOOT: {
 		const char* problemText = Result.SHOOT[resultId];
+		printProblem(commandText, problemText);
+		break;
+	}
+	case STATE: {
+		const char* problemText = Result.STATE[resultId];
 		printProblem(commandText, problemText);
 		break;
 	}
@@ -314,13 +341,13 @@ int main()
 
 
 	string command;
-	int currentPlayer = ALICE;
+	int previousStatePlayer = -2;
 	int currentStatePlayer = -1;
 	char playerInitials;
 	char commandBuffer[100];
 
 	while (cin >> command) {
-		switch (handleInput(command, &currentStatePlayer)) {
+		switch (handleInput(command, &currentStatePlayer, &previousStatePlayer)) {
 		case PRINT: {
 			int printMode;
 			cin >> printMode;
@@ -335,7 +362,7 @@ int main()
 		}
 		case NEXT_PLAYER: {
 			cin >> playerInitials;
-			currentPlayer = getPlayerId(playerInitials);
+			// playerDoingTurn = getPlayerId(playerInitials);
 			break;
 		}
 		case PLACE_SHIP: {
@@ -367,6 +394,10 @@ int main()
 		}
 		case DO_NOTHING: {
 			break;
+		}
+		case OTHER_PLAYER_TURN: {
+			strcpy_s(commandBuffer, (currentStatePlayer == ALICE) ? "[playerA] " : "[playerB] ");
+			handleResult(STATE, Result.otherPlayerExcepted, commandBuffer);
 		}
 		default:
 			cout << "INVALID COMMAND";
