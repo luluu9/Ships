@@ -86,9 +86,7 @@ struct Player {
 };
 
 
-void prepareBoard(char board[BOARD_HEIGHT][BOARD_WIDTH]);
-int countPartsRemaining(int playerId, char board[BOARD_HEIGHT][BOARD_WIDTH]);
-
-bool isPointInsideBoard(int x, int y);
-bool checkPlace(int playerId, int startX, int endX, int startY, int endY);
-
+void printProblem(char* commandText, const char* problemText);
+bool switchPlayerTurn(int currentCommandPlayerId, bool* playerCommandsToChange, int* currentStatePlayer, int* previousStatePlayer);
+int handleInput(char* command, int* currentStatePlayer, int* previousStatePlayer);
+void handleResult(int commandId, int resultId, char* commandText);

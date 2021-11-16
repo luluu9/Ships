@@ -142,6 +142,7 @@
     <ClCompile Include="Ships.cpp" />
     <ClCompile Include="Commands.cpp" />
     <ClCompile Include="Getters.cpp" />
+    <ClCompile Include="Board.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="C:\Users\Mateusz\Downloads\Ships 2021-11-07(1).pdf" />
@@ -149,6 +150,7 @@
   <ItemGroup>
     <ClInclude Include="Commands.h" />
     <ClInclude Include="Getters.h" />
+    <ClInclude Include="Board.h" />
     <ClInclude Include="Ships.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

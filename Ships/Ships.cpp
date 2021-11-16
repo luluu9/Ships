@@ -2,108 +2,15 @@
 #include "Ships.h"
 #include "Commands.h"
 #include "Getters.h"
-
-using namespace std;
-
-
-
-// COMMUNICATES
-
-void printProblem(char* commandText, const char* problemText) {
-	cout << "INVALID OPERATION \"" << commandText << "\": " << problemText << endl;
-}
-
-
-
-// BOARD
-
-void prepareBoard(char board[BOARD_HEIGHT][BOARD_WIDTH]) {
-	for (int y = 0; y < BOARD_HEIGHT; y++) {
-		for (int x = 0; x < BOARD_WIDTH; x++) {
-			if (y == DIVIDING_LINE) board[y][x] = DIVIDING_LINE_CHAR; // to visualize border
-			else board[y][x] = ' ';
-		}
-	}
-}
-
-
-bool isPointInsideBoard(int x, int y) {
-	if (x < 0 || y < 0) return false;
-	if (x >= BOARD_WIDTH || y >= BOARD_HEIGHT) return false;
-	return true;
-}
-
-
-// check if player can put ship in specified place
-bool checkPlace(int playerId, int startX, int endX, int startY, int endY) {
-	// check if its player's part of board
-	if (playerId == 0) {
-		if (startY >= DIVIDING_LINE || endY >= DIVIDING_LINE) // ship exceded forbidden line
-			return false;
-	}
-	else {
-		if (startY <= DIVIDING_LINE || endY <= DIVIDING_LINE) // ship exceded forbidden line
-			return false;
-	}
-
-	// check borders
-	if (!isPointInsideBoard(startX, startY)) return false;
-	if (!isPointInsideBoard(endX, endY)) return false;
-
-	// check collisions?
-
-	return true;
-}
-
-
-void printBoard(char board[BOARD_HEIGHT][BOARD_WIDTH], int printMode) {
-	int partsRemainingPlayerA = countPartsRemaining(ALICE, board);
-	int partsRemainingPlayerB = countPartsRemaining(BOB, board);
-	if (partsRemainingPlayerA == 0 && partsRemainingPlayerB == 0)
-		return;
-
-	for (int y = 0; y < BOARD_HEIGHT; y++) {
-		for (int x = 0; x < BOARD_WIDTH; x++) {
-			cout << board[y][x];
-		}
-		cout << endl;
-	}
-	printf("PARTS REMAINING:: A : %d B : %d\n", partsRemainingPlayerA, partsRemainingPlayerB);
-}
-
-
-int countPartsRemaining(int playerId, char board[BOARD_HEIGHT][BOARD_WIDTH]) {
-	int startY = playerId == ALICE ? 0 : DIVIDING_LINE + 1;
-	int partsRemaining = 0;
-	for (int y = startY; y < startY + BOARD_HEIGHT / 2; y++) {
-		for (int x = 0; x < BOARD_WIDTH; x++) {
-			if (board[y][x] == SHIP_CHAR)
-				partsRemaining++;
-		}
-	}
-	return partsRemaining;
-}
-
-
-int checkWinner(Player players[2], char board[BOARD_HEIGHT][BOARD_WIDTH]) {
-	// all ships have to be placed
-	bool playerAplacedAll = players[ALICE].availableFleet->areAllShipsPlaced();
-	bool playerBplacedAll = players[BOB].availableFleet->areAllShipsPlaced();
-	if (!(playerAplacedAll && playerBplacedAll))
-		return -1;
-
-	int playerAPartsRemaining = countPartsRemaining(ALICE, board);
-	int playerBPartsRemaining = countPartsRemaining(BOB, board);
-	if (playerBPartsRemaining == 0)
-		return ALICE;
-	else if (playerAPartsRemaining == 0)
-		return BOB;
-	return -1; // nobody wins
-}
-
+#include "Board.h"
 
 
 // HANDLE INPUT/RESULT
+
+void printProblem(char* commandText, const char* problemText) {
+	std::cout << "INVALID OPERATION \"" << commandText << "\": " << problemText << std::endl;
+}
+
 
 // returns true if turn ends
 bool switchPlayerTurn(int currentCommandPlayerId, bool* playerCommandsToChange, int* currentStatePlayer, int* previousStatePlayer) {
@@ -199,8 +106,7 @@ void handleResult(int commandId, int resultId, char* commandText) {
 // 20
 // (Y-axis)
 // board[y][x]
-int main()
-{
+int main() {
 	char board[BOARD_HEIGHT][BOARD_WIDTH];
 	prepareBoard(board);
 
@@ -212,22 +118,22 @@ int main()
 	int currentStatePlayer = -1, previousStatePlayer = -2;
 	char playerInitials;
 
-	while (cin >> command) {
+	while (std::cin >> command) {
 		switch (handleInput(command, &currentStatePlayer, &previousStatePlayer)) {
 		case PRINT: {
 			int printMode;
-			cin >> printMode;
+			std::cin >> printMode;
 			printBoard(board, printMode);
 			break;
 		}
 		case SET_FLEET: {
-			cin >> playerInitials;
+			std::cin >> playerInitials;
 			Player* playerToSetFleet = &Players[getPlayerId(playerInitials)];
 			setFleet(playerToSetFleet);
 			break;
 		}
 		case NEXT_PLAYER: {
-			cin >> playerInitials;
+			std::cin >> playerInitials;
 			// playerDoingTurn = getPlayerId(playerInitials);
 			break;
 		}
@@ -236,7 +142,7 @@ int main()
 			int y, x, shipId;
 			char shipDir;
 			char shipType[3]; // The classes are denoted by [CAR]RIER, [BAT]TLESHIP, [CRU]ISER, [DES]TROYER.
-			cin >> y >> x >> shipDir >> shipId >> shipType;
+			std::cin >> y >> x >> shipDir >> shipId >> shipType;
 
 			sprintf_s(fullCommand, "PLACE_SHIP %d %d %c %d %s",
 				y, x, shipDir, shipId, shipType);
@@ -251,7 +157,7 @@ int main()
 		}
 		case SHOOT: { // Shooting can only start if all the ships were placed.
 			int x, y;
-			cin >> y >> x;
+			std::cin >> y >> x;
 			sprintf_s(fullCommand, "SHOOT %d %d", y, x);
 			int result = shoot(board, Players, x, y);
 			handleResult(SHOOT, result, fullCommand);
@@ -278,7 +184,7 @@ int main()
 			break;
 		}
 		default:
-			cout << "INVALID COMMAND";
+			std::cout << "INVALID COMMAND" << std::endl;
 		}
 	}
 }

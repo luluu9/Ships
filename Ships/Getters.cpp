@@ -1,6 +1,7 @@
 #include <iostream>
 #include "ships.h"
 
+
 int getCommandId(char* command) {
 	if (strcmp(command, "PRINT") == 0) return PRINT;
 	if (strcmp(command, "SET_FLEET") == 0) return SET_FLEET;

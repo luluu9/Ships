@@ -1,6 +1,7 @@
 #include <iostream>
 #include "Getters.h"
 #include "Ships.h"
+#include "Board.h"
 
 
 // places ship on the board if it is possible
