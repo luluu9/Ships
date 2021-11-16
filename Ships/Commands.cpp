@@ -1,4 +1,5 @@
 #include <iostream>
+#include "Getters.h"
 #include "Ships.h"
 
 

@@ -92,8 +92,3 @@ int countPartsRemaining(int playerId, char board[BOARD_HEIGHT][BOARD_WIDTH]);
 bool isPointInsideBoard(int x, int y);
 bool checkPlace(int playerId, int startX, int endX, int startY, int endY);
 
-int getCommandId(char* command);
-int getPlayerId(char playerInitials);
-int getDirectionId(char dirAbbreviation);
-int getShipTypeId(char* shipTypeAbbreviation);
-int getShipLength(int shipTypeId);

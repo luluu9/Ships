@@ -1,6 +1,7 @@
 #include <iostream>
 #include "Ships.h"
 #include "Commands.h"
+#include "Getters.h"
 
 using namespace std;
 
@@ -13,7 +14,18 @@ void printProblem(char* commandText, const char* problemText) {
 }
 
 
-// PLAYER
+
+// BOARD
+
+void prepareBoard(char board[BOARD_HEIGHT][BOARD_WIDTH]) {
+	for (int y = 0; y < BOARD_HEIGHT; y++) {
+		for (int x = 0; x < BOARD_WIDTH; x++) {
+			if (y == DIVIDING_LINE) board[y][x] = DIVIDING_LINE_CHAR; // to visualize border
+			else board[y][x] = ' ';
+		}
+	}
+}
+
 
 bool isPointInsideBoard(int x, int y) {
 	if (x < 0 || y < 0) return false;
@@ -41,72 +53,6 @@ bool checkPlace(int playerId, int startX, int endX, int startY, int endY) {
 	// check collisions?
 
 	return true;
-}
-
-
-
-// GETTERS - mo¿e da siê to ujednoliciæ do jednej krótkiej funkcji?
-
-int getCommandId(char *command) {
-	if (strcmp(command, "PRINT") == 0) return PRINT;
-	if (strcmp(command, "SET_FLEET") == 0) return SET_FLEET;
-	if (strcmp(command, "NEXT_PLAYER") == 0) return NEXT_PLAYER;
-	if (strcmp(command, "PLACE_SHIP") == 0) return PLACE_SHIP;
-	if (strcmp(command, "SHOOT") == 0) return SHOOT;
-	if (strcmp(command, "CLEAR") == 0) return CLEAR;
-	cout << "GOT BAD COMMAND IN getCommandId FUNCTION" << endl;
-	return -1;
-}
-
-
-int getPlayerId(char playerInitials) {
-	if (playerInitials == 'A') return ALICE;
-	if (playerInitials == 'B') return BOB;
-	cout << "GOT BAD PLAYER INITIALS IN getPlayerId FUNCTION" << endl;
-	return -1;
-}
-
-
-int getDirectionId(char dirAbbreviation) {
-	if (dirAbbreviation == 'N') return NORTH;
-	if (dirAbbreviation == 'E') return EAST;
-	if (dirAbbreviation == 'S') return SOUTH;
-	if (dirAbbreviation == 'W') return WEST;
-	cout << "GOT BAD DIRECTION ABBREVIATION IN getDirectionId FUNCTION" << endl;
-	return -1;
-}
-
-
-int getShipTypeId(char *shipTypeAbbreviation) {
-	if (strcmp(shipTypeAbbreviation, "CAR") == 0) return CARRIER;
-	if (strcmp(shipTypeAbbreviation, "BAT") == 0) return BATTLESHIP;
-	if (strcmp(shipTypeAbbreviation, "CRU") == 0) return CRUISER;
-	if (strcmp(shipTypeAbbreviation, "DES") == 0) return DESTROYER;
-	cout << "GOT BAD SHIP TYPE ABBREVIATION IN getShipTypeId FUNCTION" << endl;
-	return -1;
-}
-
-
-int getShipLength(int shipTypeId) {
-	if (shipTypeId == CARRIER) return CARRIER_LENGTH;
-	if (shipTypeId == BATTLESHIP) return BATTLESHIP_LENGTH;
-	if (shipTypeId == CRUISER) return CRUISER_LENGTH;
-	if (shipTypeId == DESTROYER) return DESTROYER_LENGTH;
-	cout << "GOT BAD SHIP TYPE ID IN getShipLength FUNCTION" << endl;
-	return -1;
-}
-
-
-
-// BOARD
-
-void prepareBoard(char board[BOARD_HEIGHT][BOARD_WIDTH]) {
-	for (int y = 0; y < BOARD_HEIGHT; y++) {
-		for (int x = 0; x < BOARD_WIDTH; x++) {
-			if (y == DIVIDING_LINE) board[y][x] = DIVIDING_LINE_CHAR; // to visualize border
-			else board[y][x] = ' ';
-		}
-	}
 }
 
 
@@ -258,16 +204,13 @@ int main()
 	char board[BOARD_HEIGHT][BOARD_WIDTH];
 	prepareBoard(board);
 
-	Player Players[2] = {}; // Problems with Designated Initializers
+	Player Players[2] = {};
 	Players[0].id = ALICE;
 	Players[1].id = BOB;
 
-
-	char command[100];
-	int previousStatePlayer = -2;
-	int currentStatePlayer = -1;
+	char command[100], fullCommand[100];
+	int currentStatePlayer = -1, previousStatePlayer = -2;
 	char playerInitials;
-	char fullCommand[100];
 
 	while (cin >> command) {
 		switch (handleInput(command, &currentStatePlayer, &previousStatePlayer)) {
