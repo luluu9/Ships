@@ -9,6 +9,14 @@ int getCommandId(char* command) {
 	if (strcmp(command, "PLACE_SHIP") == 0) return PLACE_SHIP;
 	if (strcmp(command, "SHOOT") == 0) return SHOOT;
 	if (strcmp(command, "CLEAR") == 0) return CLEAR;
+	if (strcmp(command, "BOARD_SIZE") == 0) return BOARD_SIZE;
+	if (strcmp(command, "INIT_POSITION") == 0) return INIT_POSITION;
+	if (strcmp(command, "REEF") == 0) return REEF;
+	if (strcmp(command, "SHIP") == 0) return SHIP;
+	if (strcmp(command, "EXTENDED_SHIPS") == 0) return EXTENDED_SHIPS;
+	if (strcmp(command, "SET_AI_PLAYER") == 0) return SET_AI_PLAYER;
+	if (strcmp(command, "SRAND") == 0) return SRAND;
+	if (strcmp(command, "SAVE") == 0) return SAVE;
 	std::cout << "GOT BAD COMMAND IN getCommandId FUNCTION" << std::endl;
 	return -1;
 }

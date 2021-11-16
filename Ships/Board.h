@@ -16,6 +16,13 @@ struct Board {
 	int BOARD_HEIGHT = DEFAULT_BOARD_HEIGHT;
 	char* cells = new char[BOARD_WIDTH * BOARD_HEIGHT];
 
+	// Player's rectangle allows Player to place ships in specified area (inclusive)
+	enum rectangleIndexes { minXInd, minYInd, maxXInd, maxYInd };
+	int playersRectangle[2][4] = {
+		{0, 0, BOARD_WIDTH - 1, DIVIDING_LINE - 1 },
+		{ 0, DIVIDING_LINE + 1, BOARD_WIDTH - 1, BOARD_HEIGHT - 1 }
+	};
+
 
 	// BASE METHODS
 
@@ -80,10 +87,13 @@ struct Board {
 	// HELPERS
 
 	int countPartsRemaining(int playerId) {
-		int startY = playerId == ALICE ? 0 : DIVIDING_LINE + 1;
 		int partsRemaining = 0;
-		for (int y = startY; y < startY + BOARD_HEIGHT / 2; y++) {
-			for (int x = 0; x < BOARD_WIDTH; x++) {
+		int startY = playersRectangle[playerId][minYInd];
+		int endY = playersRectangle[playerId][maxYInd];
+		int startX = playersRectangle[playerId][minXInd];
+		int endX = playersRectangle[playerId][maxXInd];
+		for (int y = startY; y <= endY; y++) {
+			for (int x = startX; x <= endX; x++) {
 				if (getCell(x, y) == SHIP_CHAR)
 					partsRemaining++;
 			}
@@ -109,17 +119,18 @@ struct Board {
 		printf("PARTS REMAINING:: A : %d B : %d\n", partsRemainingPlayerA, partsRemainingPlayerB);
 	};
 
+
 	// check if player can put ship in specified place
 	int checkPlace(int playerId, int startX, int endX, int startY, int endY) {
 		// check if its player's part of board
-		if (playerId == 0) {
-			if (startY >= DIVIDING_LINE || endY >= DIVIDING_LINE) // ship exceded forbidden line
-				return false;
-		}
-		else {
-			if (startY <= DIVIDING_LINE || endY <= DIVIDING_LINE) // ship exceded forbidden line
-				return false;
-		}
+		if (startX < playersRectangle[playerId][minXInd] || endX < playersRectangle[playerId][minXInd])
+			return false;
+		if (startX > playersRectangle[playerId][maxXInd] || endX > playersRectangle[playerId][maxXInd])
+			return false;
+		if (startY < playersRectangle[playerId][minYInd] || endY < playersRectangle[playerId][minYInd])
+			return false;
+		if (startY > playersRectangle[playerId][maxYInd] || endY > playersRectangle[playerId][maxYInd])
+			return false;
 
 		// check borders
 		if (!isPointInside(startX, startY)) return false;
@@ -147,6 +158,16 @@ struct Board {
 			return BOB;
 		return -1; // nobody wins
 	}
+
+	void limitPosition(int playerId, int minX, int minY, int maxX, int maxY) {
+		playersRectangle[playerId][minXInd] = minX;
+		playersRectangle[playerId][minYInd] = minY;
+		playersRectangle[playerId][maxXInd] = maxX;
+		playersRectangle[playerId][maxYInd] = maxY;
+	}
+
+
+	// DESTROYER
 
 	~Board() {
 		delete[] cells;

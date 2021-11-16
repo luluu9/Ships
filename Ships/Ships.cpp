@@ -51,10 +51,20 @@ int handleInput(char* command, int* currentStatePlayer, int* previousStatePlayer
 
 		int commandId = getCommandId(command);
 
+		// TODO: change this
 		if (stateCommands) {
 			if (commandId == PRINT ||
 				commandId == SET_FLEET ||
-				commandId == NEXT_PLAYER)
+				commandId == NEXT_PLAYER ||
+				commandId == BOARD_SIZE ||
+				commandId == INIT_POSITION ||
+				commandId == REEF ||
+				commandId == SHIP ||
+				commandId == EXTENDED_SHIPS ||
+				commandId == SET_AI_PLAYER ||
+				commandId == SRAND ||
+				commandId == SAVE
+				)
 				return commandId;
 		}
 		else {
@@ -116,8 +126,7 @@ int main() {
 
 	char command[100], fullCommand[100];
 	int currentStatePlayer = -1, previousStatePlayer = -2;
-	char playerInitials;
-
+	
 	while (std::cin >> command) {
 		switch (handleInput(command, &currentStatePlayer, &previousStatePlayer)) {
 		case PRINT: {
@@ -127,12 +136,14 @@ int main() {
 			break;
 		}
 		case SET_FLEET: {
+			char playerInitials;
 			std::cin >> playerInitials;
 			Player* playerToSetFleet = &Players[getPlayerId(playerInitials)];
 			setFleet(playerToSetFleet);
 			break;
 		}
 		case NEXT_PLAYER: {
+			char playerInitials;
 			std::cin >> playerInitials;
 			// playerDoingTurn = getPlayerId(playerInitials);
 			break;
@@ -161,6 +172,21 @@ int main() {
 			sprintf_s(fullCommand, "SHOOT %d %d", y, x);
 			int result = shoot(board, Players, x, y);
 			handleResult(SHOOT, result, fullCommand);
+			break;
+		}
+		case BOARD_SIZE: {
+			int x, y;
+			std::cin >> y >> x;
+			sprintf_s(fullCommand, "BOARD_SIZE %d %d", y, x);
+			board->setBoardSize(x, y);
+			break;
+		}
+		case INIT_POSITION: {
+			char playerInitials;
+			int minY, minX, maxY, maxX;
+			std::cin >> playerInitials >> minY >> minX >> maxY >> maxX;
+			int playerId = getPlayerId(playerInitials);
+			board->limitPosition(playerId, minX, minY, maxX, maxY);
 			break;
 		}
 		case CLEAR: {
