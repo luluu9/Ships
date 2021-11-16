@@ -1,5 +1,4 @@
-#ifndef SHIPS
-#define SHIPS
+#pragma once
 
 enum COMMANDS { DO_NOTHING, OTHER_PLAYER_TURN, END_TURN, STATE, PRINT, SET_FLEET, NEXT_PLAYER, PLACE_SHIP, SHOOT, CLEAR };
 enum DIRECTIONS { NORTH, EAST, SOUTH, WEST };
@@ -21,6 +20,33 @@ const int CARRIER_LENGTH = 5;
 const int BATTLESHIP_LENGTH = 4;
 const int CRUISER_LENGTH = 3;
 const int DESTROYER_LENGTH = 2;
+
+
+static const struct Result {
+	const char* PLACE_SHIP[3] = {
+		"NOT IN STARTING POSITION",          // invalidPosition
+		"SHIP ALREADY PRESENT",              // shipAlreadyPresent
+		"ALL SHIPS OF THE CLASS ALREADY SET" // shipsExcess
+	};
+
+	const char* SHOOT[2] = {
+		"FIELD DOES NOT EXIST",
+		"NOT ALL SHIPS PLACED"
+	};
+
+	const char* STATE[1] = {
+		"THE OTHER PLAYER EXPECTED"
+	};
+
+	enum RESULTS {
+		undefined = -2, success = -1,								  // COMMON_RESULTS
+		invalidPosition = 0, shipAlreadyPresent = 1, shipsExcess = 2, // PLACE_SHIP_RESULTS
+		/* invalidPosition = 0, */ notEnoughShips = 1,                // SHOOT_RESULTS
+		otherPlayerExcepted = 0										  // STATE_RESULTS
+	};
+
+
+} Result;
 
 
 // default ships with their number for each player
@@ -63,15 +89,11 @@ struct Player {
 void prepareBoard(char board[BOARD_HEIGHT][BOARD_WIDTH]);
 int countPartsRemaining(int playerId, char board[BOARD_HEIGHT][BOARD_WIDTH]);
 
+bool isPointInsideBoard(int x, int y);
 bool checkPlace(int playerId, int startX, int endX, int startY, int endY);
-int placeShip(char board[BOARD_HEIGHT][BOARD_WIDTH], Player* player, int x, int y, int shipId, int direction, int shipType);
-int shoot(char board[BOARD_HEIGHT][BOARD_WIDTH], Player players[2], int x, int y);
-void setFleet(Player* player);
 
 int getCommandId(char* command);
 int getPlayerId(char playerInitials);
 int getDirectionId(char dirAbbreviation);
 int getShipTypeId(char* shipTypeAbbreviation);
 int getShipLength(int shipTypeId);
-	
-#endif

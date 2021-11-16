@@ -1,5 +1,6 @@
 #include <iostream>
 #include "Ships.h"
+#include "Commands.h"
 
 using namespace std;
 
@@ -7,37 +8,9 @@ using namespace std;
 
 // COMMUNICATES
 
-struct Result {
-	const char* PLACE_SHIP[3] = {
-		"NOT IN STARTING POSITION",          // invalidPosition
-		"SHIP ALREADY PRESENT",              // shipAlreadyPresent
-		"ALL SHIPS OF THE CLASS ALREADY SET" // shipsExcess
-	};
-
-	const char* SHOOT[2] = {
-		"FIELD DOES NOT EXIST",
-		"NOT ALL SHIPS PLACED"
-	};
-
-	const char* STATE[1] = {
-		"THE OTHER PLAYER EXPECTED"
-	};
-
-	enum RESULTS {
-		undefined = -2, success = -1,								  // COMMON_RESULTS
-		invalidPosition = 0, shipAlreadyPresent = 1, shipsExcess = 2, // PLACE_SHIP_RESULTS
-		/* invalidPosition = 0, */ notEnoughShips = 1,                // SHOOT_RESULTS
-		otherPlayerExcepted = 0										  // STATE_RESULTS
-	};
-
-
-} Result;
-
-
 void printProblem(char* commandText, const char* problemText) {
 	cout << "INVALID OPERATION \"" << commandText << "\": " << problemText << endl;
 }
-
 
 
 // PLAYER
@@ -68,77 +41,6 @@ bool checkPlace(int playerId, int startX, int endX, int startY, int endY) {
 	// check collisions?
 
 	return true;
-}
-
-
-
-// COMMANDS
-
-// places ship on the board if it is possible
-// x, y is the bow of the ship
-// czy i-th ship (shipId u mnie) trzeba sprawdzaæ? 
-// po co w ogóle to jest, jeœli wiemy ile statków 
-// mo¿e byæ maks (mo¿emy zliczaæ ile by³o dotychczas)?
-int placeShip(char board[BOARD_HEIGHT][BOARD_WIDTH], Player* player, int x, int y, int shipId, int direction, int shipType) {
-	int shipLength = getShipLength(shipType);
-	int startX = x, endX = x, startY = y, endY = y;
-
-	// -1 because startY takes one cell
-	if (direction == NORTH) endY = y + shipLength - 1;
-	else if (direction == SOUTH) endY = y - shipLength + 1;
-	else if (direction == EAST) endX = x - shipLength + 1;
-	else if (direction == WEST) endX = x + shipLength - 1;
-	else return Result.undefined;
-
-	if (!checkPlace(player->id, startX, endX, startY, endY)) {
-		// invalid position for ship
-		return Result.invalidPosition;
-	}
-
-	bool shipAlreadyUsed = player->availableFleet->isShipUsed(shipType, shipId);
-	if (shipAlreadyUsed) return Result.shipAlreadyPresent;
-
-	bool enoughShips = player->availableFleet->useShip(shipType);
-	if (!enoughShips) return Result.shipsExcess;
-
-	for (int i = 0; i < shipLength; i++) {
-		if (direction == NORTH) board[startY + i][startX] = SHIP_CHAR;
-		else if (direction == SOUTH) board[startY - i][startX] = SHIP_CHAR;
-		else if (direction == EAST) board[startY][startX - i] = SHIP_CHAR;
-		else if (direction == WEST) board[startY][startX + i] = SHIP_CHAR;
-	}
-
-	return Result.success;
-}
-
-
-// returns if shot hits
-// the shoot is at a position in the board (FIELD DOES NOT EXIST),
-// and that all ships that should be placed were already placed (NOT ALL SHIPS PLACED)
-int shoot(char board[BOARD_HEIGHT][BOARD_WIDTH], Player players[2], int x, int y) {
-	if (!isPointInsideBoard(x, y)) return Result.invalidPosition;
-	if (!players[ALICE].availableFleet->areAllShipsPlaced()) return Result.notEnoughShips;
-	if (!players[BOB].availableFleet->areAllShipsPlaced()) return Result.notEnoughShips;
-
-	if (board[y][x] == SHIP_CHAR)
-		board[y][x] = DAMAGED_CHAR;
-
-	return Result.success;
-}
-
-
-// set number of each ship for player
-void setFleet(Player* player) {
-	int quantity;
-	for (int shipType = CARRIER; shipType <= DESTROYER; shipType++) {
-		cin >> quantity;
-		int actualShipsNumber = player->availableFleet->shipsNumber[shipType];
-		int actualShipsRemaining = player->availableFleet->shipsNumber[shipType];
-		int usedShipsNumber = actualShipsNumber - actualShipsRemaining;
-
-		player->availableFleet->shipsNumber[shipType] = quantity;
-		player->availableFleet->remainingShips[shipType] = quantity - usedShipsNumber;
-	}
 }
 
 
@@ -365,7 +267,7 @@ int main()
 	int previousStatePlayer = -2;
 	int currentStatePlayer = -1;
 	char playerInitials;
-	char commandBuffer[100];
+	char fullCommand[100];
 
 	while (cin >> command) {
 		switch (handleInput(command, &currentStatePlayer, &previousStatePlayer)) {
@@ -393,7 +295,7 @@ int main()
 			char shipType[3]; // The classes are denoted by [CAR]RIER, [BAT]TLESHIP, [CRU]ISER, [DES]TROYER.
 			cin >> y >> x >> shipDir >> shipId >> shipType;
 
-			sprintf_s(commandBuffer, "PLACE_SHIP %d %d %c %d %s",
+			sprintf_s(fullCommand, "PLACE_SHIP %d %d %c %d %s",
 				y, x, shipDir, shipId, shipType);
 
 			int result = placeShip(board, &playerPlacingShip,
@@ -401,15 +303,15 @@ int main()
 				getDirectionId(shipDir),
 				getShipTypeId(shipType));
 
-			handleResult(PLACE_SHIP, result, commandBuffer);
+			handleResult(PLACE_SHIP, result, fullCommand);
 			break;
 		}
 		case SHOOT: { // Shooting can only start if all the ships were placed.
 			int x, y;
 			cin >> y >> x;
-			sprintf_s(commandBuffer, "SHOOT %d %d", y, x);
+			sprintf_s(fullCommand, "SHOOT %d %d", y, x);
 			int result = shoot(board, Players, x, y);
-			handleResult(SHOOT, result, commandBuffer);
+			handleResult(SHOOT, result, fullCommand);
 			break;
 		}
 		case CLEAR: {
@@ -417,8 +319,8 @@ int main()
 			break;
 		}
 		case OTHER_PLAYER_TURN: {
-			strcpy_s(commandBuffer, (currentStatePlayer == ALICE) ? "[playerA] " : "[playerB] ");
-			handleResult(STATE, Result.otherPlayerExcepted, commandBuffer);
+			strcpy_s(fullCommand, (currentStatePlayer == ALICE) ? "[playerA] " : "[playerB] ");
+			handleResult(STATE, Result.otherPlayerExcepted, fullCommand);
 			break;
 		}
 		case END_TURN: {
