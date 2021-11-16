@@ -1,7 +1,7 @@
 #include <iostream>
 #include "Getters.h"
-#include "Board.h"
 #include "ShipsDataTypes.h"
+#include "Board.h"
 
 
 // places ship on the board if it is possible
@@ -9,7 +9,7 @@
 // czy i-th ship (shipId u mnie) trzeba sprawdzaæ? 
 // po co w ogóle to jest, jeœli wiemy ile statków 
 // mo¿e byæ maks (mo¿emy zliczaæ ile by³o dotychczas)?
-int placeShip(char board[BOARD_HEIGHT][BOARD_WIDTH], Player* player, int x, int y, int shipId, int direction, int shipType) {
+int placeShip(Board *board, Player* player, int x, int y, int shipId, int direction, int shipType) {
 	int shipLength = getShipLength(shipType);
 	int startX = x, endX = x, startY = y, endY = y;
 
@@ -20,7 +20,7 @@ int placeShip(char board[BOARD_HEIGHT][BOARD_WIDTH], Player* player, int x, int 
 	else if (direction == WEST) endX = x + shipLength - 1;
 	else return Result.undefined;
 
-	if (!checkPlace(player->id, startX, endX, startY, endY)) {
+	if (!board->checkPlace(player->id, startX, endX, startY, endY)) {
 		// invalid position for ship
 		return Result.invalidPosition;
 	}
@@ -32,10 +32,10 @@ int placeShip(char board[BOARD_HEIGHT][BOARD_WIDTH], Player* player, int x, int 
 	if (!enoughShips) return Result.shipsExcess;
 
 	for (int i = 0; i < shipLength; i++) {
-		if (direction == NORTH) board[startY + i][startX] = SHIP_CHAR;
-		else if (direction == SOUTH) board[startY - i][startX] = SHIP_CHAR;
-		else if (direction == EAST) board[startY][startX - i] = SHIP_CHAR;
-		else if (direction == WEST) board[startY][startX + i] = SHIP_CHAR;
+		if (direction == NORTH) board->setCell(startX, startY + i, SHIP_CHAR);
+		else if (direction == SOUTH) board->setCell(startX, startY - i, SHIP_CHAR);
+		else if (direction == EAST) board->setCell(startX - i, startY, SHIP_CHAR);
+		else if (direction == WEST) board->setCell(startX + i, startY, SHIP_CHAR);
 	}
 
 	return Result.success;
@@ -45,13 +45,13 @@ int placeShip(char board[BOARD_HEIGHT][BOARD_WIDTH], Player* player, int x, int 
 // returns if shot hits
 // the shoot is at a position in the board (FIELD DOES NOT EXIST),
 // and that all ships that should be placed were already placed (NOT ALL SHIPS PLACED)
-int shoot(char board[BOARD_HEIGHT][BOARD_WIDTH], Player players[2], int x, int y) {
-	if (!isPointInsideBoard(x, y)) return Result.invalidPosition;
+int shoot(Board *board, Player players[2], int x, int y) {
+	if (!board->isPointInside(x, y)) return Result.invalidPosition;
 	if (!players[ALICE].availableFleet->areAllShipsPlaced()) return Result.notEnoughShips;
 	if (!players[BOB].availableFleet->areAllShipsPlaced()) return Result.notEnoughShips;
 
-	if (board[y][x] == SHIP_CHAR)
-		board[y][x] = DAMAGED_CHAR;
+	if (board->getCell(x, y) == SHIP_CHAR)
+		board->setCell(x, y, DAMAGED_CHAR);
 
 	return Result.success;
 }

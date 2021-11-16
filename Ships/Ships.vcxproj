@@ -142,7 +142,6 @@
     <ClCompile Include="Ships.cpp" />
     <ClCompile Include="Commands.cpp" />
     <ClCompile Include="Getters.cpp" />
-    <ClCompile Include="Board.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="C:\Users\Mateusz\Downloads\Ships 2021-11-07(1).pdf" />

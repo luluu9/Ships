@@ -107,8 +107,8 @@ void handleResult(int commandId, int resultId, char* commandText) {
 // (Y-axis)
 // board[y][x]
 int main() {
-	char board[BOARD_HEIGHT][BOARD_WIDTH];
-	prepareBoard(board);
+	Board *board = new Board();
+	board->prepareBoard();
 
 	Player Players[2] = {};
 	Players[0].id = ALICE;
@@ -123,7 +123,7 @@ int main() {
 		case PRINT: {
 			int printMode;
 			std::cin >> printMode;
-			printBoard(board, printMode);
+			board->printBoard(printMode);
 			break;
 		}
 		case SET_FLEET: {
@@ -164,7 +164,7 @@ int main() {
 			break;
 		}
 		case CLEAR: {
-			prepareBoard(board);
+			board->prepareBoard();
 			break;
 		}
 		case OTHER_PLAYER_TURN: {
@@ -173,7 +173,7 @@ int main() {
 			break;
 		}
 		case END_TURN: {
-			int winner = checkWinner(Players, board);
+			int winner = board->checkWinner(Players);
 			if (winner == ALICE || winner == BOB) {
 				printf("%c won", winner == ALICE ? 'A' : 'B');
 				exit(0);

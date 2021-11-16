@@ -5,14 +5,6 @@ enum DIRECTIONS { NORTH, EAST, SOUTH, WEST };
 enum PLAYERS { ALICE, BOB }; // [A]lice = 0, [B]ob = 1
 enum SHIPS { CARRIER, BATTLESHIP, CRUISER, DESTROYER };
 
-const int DIVIDING_LINE = 10;
-const int BOARD_WIDTH = 10;
-const int BOARD_HEIGHT = 21;
-
-const char SHIP_CHAR = '+';
-const char DAMAGED_CHAR = 'x';
-const char DIVIDING_LINE_CHAR = ' ';
-
 const int MAX_NUMBER_OF_SHIPS = 10;
 const int NUMBER_OF_SHIP_TYPES = 4;
 
