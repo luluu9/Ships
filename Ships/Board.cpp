@@ -1,6 +1,5 @@
 #include <iostream>
-#include "Ships.h"
-#include "Board.h"
+#include "ShipsDataTypes.h"
 
 
 void prepareBoard(char board[BOARD_HEIGHT][BOARD_WIDTH]) {
@@ -42,6 +41,19 @@ bool checkPlace(int playerId, int startX, int endX, int startY, int endY) {
 }
 
 
+int countPartsRemaining(int playerId, char board[BOARD_HEIGHT][BOARD_WIDTH]) {
+	int startY = playerId == ALICE ? 0 : DIVIDING_LINE + 1;
+	int partsRemaining = 0;
+	for (int y = startY; y < startY + BOARD_HEIGHT / 2; y++) {
+		for (int x = 0; x < BOARD_WIDTH; x++) {
+			if (board[y][x] == SHIP_CHAR)
+				partsRemaining++;
+		}
+	}
+	return partsRemaining;
+}
+
+
 void printBoard(char board[BOARD_HEIGHT][BOARD_WIDTH], int printMode) {
 	int partsRemainingPlayerA = countPartsRemaining(ALICE, board);
 	int partsRemainingPlayerB = countPartsRemaining(BOB, board);
@@ -55,19 +67,6 @@ void printBoard(char board[BOARD_HEIGHT][BOARD_WIDTH], int printMode) {
 		std::cout << std::endl;
 	}
 	printf("PARTS REMAINING:: A : %d B : %d\n", partsRemainingPlayerA, partsRemainingPlayerB);
-}
-
-
-int countPartsRemaining(int playerId, char board[BOARD_HEIGHT][BOARD_WIDTH]) {
-	int startY = playerId == ALICE ? 0 : DIVIDING_LINE + 1;
-	int partsRemaining = 0;
-	for (int y = startY; y < startY + BOARD_HEIGHT / 2; y++) {
-		for (int x = 0; x < BOARD_WIDTH; x++) {
-			if (board[y][x] == SHIP_CHAR)
-				partsRemaining++;
-		}
-	}
-	return partsRemaining;
 }
 
 

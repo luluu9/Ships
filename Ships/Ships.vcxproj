@@ -151,6 +151,7 @@
     <ClInclude Include="Commands.h" />
     <ClInclude Include="Getters.h" />
     <ClInclude Include="Board.h" />
+    <ClInclude Include="ShipsDataTypes.h" />
     <ClInclude Include="Ships.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

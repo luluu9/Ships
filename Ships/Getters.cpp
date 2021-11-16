@@ -1,5 +1,5 @@
 #include <iostream>
-#include "ships.h"
+#include "ShipsDataTypes.h"
 
 
 int getCommandId(char* command) {

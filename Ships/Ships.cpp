@@ -1,8 +1,8 @@
 #include <iostream>
-#include "Ships.h"
 #include "Commands.h"
 #include "Getters.h"
 #include "Board.h"
+#include "ShipsDataTypes.h"
 
 
 // HANDLE INPUT/RESULT

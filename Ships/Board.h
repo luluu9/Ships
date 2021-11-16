@@ -1,5 +1,5 @@
 #pragma once
-#include "Ships.h"
+#include "ShipsDataTypes.h"
 
 void prepareBoard(char board[BOARD_HEIGHT][BOARD_WIDTH]);
 bool isPointInsideBoard(int x, int y);
