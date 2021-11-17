@@ -189,6 +189,13 @@ int main() {
 			board->limitPosition(playerId, minX, minY, maxX, maxY);
 			break;
 		}
+		case REEF: {
+			int x, y;
+			std::cin >> y >> x;
+			sprintf_s(fullCommand, "REEF %d %d", y, x);
+			board->setReef(x, y);
+			break;
+		}
 		case CLEAR: {
 			board->prepareBoard();
 			break;

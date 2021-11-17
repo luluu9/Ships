@@ -9,6 +9,7 @@ const int DEFAULT_BOARD_HEIGHT = 21;
 const char SHIP_CHAR = '+';
 const char DAMAGED_CHAR = 'x';
 const char DIVIDING_LINE_CHAR = ' ';
+const char REEF_CHAR = '#';
 
 
 struct Board {
@@ -30,7 +31,13 @@ struct Board {
 		if (x < 0 || y < 0) return false;
 		if (x >= BOARD_WIDTH || y >= BOARD_HEIGHT) return false;
 		return true;
-	}
+	};
+
+	bool isReef(int x, int y) {
+		if (cells[getIndex(x, y)] == REEF_CHAR)
+			return true;
+		return false;
+	};
 
 	int getIndex(int x, int y) {
 		return x + y * BOARD_WIDTH;
@@ -71,7 +78,7 @@ struct Board {
 				int currentIndex = getIndex(x, y);
 				targetArray[currentIndex] = cells[currentIndex];
 			}
-	}
+	};
 
 	void setBoardSize(int newWidth, int newHeight) {
 		char* newCells = new char[newWidth * newHeight];
@@ -81,7 +88,7 @@ struct Board {
 		cells = newCells;
 		BOARD_WIDTH = newWidth;
 		BOARD_HEIGHT = newHeight;
-	}
+	};
 
 
 	// HELPERS
@@ -99,7 +106,7 @@ struct Board {
 			}
 		}
 		return partsRemaining;
-	}
+	};
 
 
 	// COMMANDS
@@ -123,23 +130,23 @@ struct Board {
 	// check if player can put ship in specified place
 	int checkPlace(int playerId, int startX, int endX, int startY, int endY) {
 		// check if its player's part of board
-		if (startX < playersRectangle[playerId][minXInd] || endX < playersRectangle[playerId][minXInd])
-			return false;
-		if (startX > playersRectangle[playerId][maxXInd] || endX > playersRectangle[playerId][maxXInd])
-			return false;
-		if (startY < playersRectangle[playerId][minYInd] || endY < playersRectangle[playerId][minYInd])
-			return false;
-		if (startY > playersRectangle[playerId][maxYInd] || endY > playersRectangle[playerId][maxYInd])
-			return false;
+		if (startX < playersRectangle[playerId][minXInd] || endX > playersRectangle[playerId][maxXInd])
+			return OUTSIDE_BOARD;
+		if (startY < playersRectangle[playerId][minYInd] || endY > playersRectangle[playerId][maxYInd])
+			return OUTSIDE_BOARD;
 
 		// check borders
-		if (!isPointInside(startX, startY)) return false;
-		if (!isPointInside(endX, endY)) return false;
+		if (!isPointInside(startX, startY)) return OUTSIDE_BOARD;
+		if (!isPointInside(endX, endY)) return OUTSIDE_BOARD;
 
-		// check collisions?
+		// check reefs
+		for (int x = startX; x <= endX; x++)
+			for (int y = startY; y <= endY; y++)
+				if (isReef(x, y))
+					return REEF_CELLS;
 
-		return true;
-	}
+		return EMPTY_CELLS;
+	};
 
 	// returns id of winning Player
 	// if there is no winner, returns -1
@@ -157,15 +164,18 @@ struct Board {
 		else if (playerAPartsRemaining == 0)
 			return BOB;
 		return -1; // nobody wins
-	}
+	};
 
 	void limitPosition(int playerId, int minX, int minY, int maxX, int maxY) {
 		playersRectangle[playerId][minXInd] = minX;
 		playersRectangle[playerId][minYInd] = minY;
 		playersRectangle[playerId][maxXInd] = maxX;
 		playersRectangle[playerId][maxYInd] = maxY;
-	}
+	};
 
+	void setReef(int x, int y) {
+		setCell(x, y, REEF_CHAR);
+	};
 
 	// DESTROYER
 

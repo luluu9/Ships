@@ -6,9 +6,6 @@
 
 // places ship on the board if it is possible
 // x, y is the bow of the ship
-// czy i-th ship (shipId u mnie) trzeba sprawdzaæ? 
-// po co w ogóle to jest, jeœli wiemy ile statków 
-// mo¿e byæ maks (mo¿emy zliczaæ ile by³o dotychczas)?
 int placeShip(Board *board, Player* player, int x, int y, int shipId, int direction, int shipType) {
 	int shipLength = getShipLength(shipType);
 	int startX = x, endX = x, startY = y, endY = y;
@@ -20,10 +17,15 @@ int placeShip(Board *board, Player* player, int x, int y, int shipId, int direct
 	else if (direction == WEST) endX = x + shipLength - 1;
 	else return Result.undefined;
 
-	if (!board->checkPlace(player->id, startX, endX, startY, endY)) {
-		// invalid position for ship
+	// make sure that startPos is smaller or equal to endPos
+	if (startX > endX) std::swap(startX, endX);
+	if (startY > endY) std::swap(startY, endY);
+
+	int cellsContent = board->checkPlace(player->id, startX, endX, startY, endY);
+	if (cellsContent == OUTSIDE_BOARD)
 		return Result.invalidPosition;
-	}
+	else if (cellsContent == REEF_CELLS)
+		return Result.reef;
 
 	bool shipAlreadyUsed = player->availableFleet->isShipUsed(shipType, shipId);
 	if (shipAlreadyUsed) return Result.shipAlreadyPresent;
@@ -31,12 +33,9 @@ int placeShip(Board *board, Player* player, int x, int y, int shipId, int direct
 	bool enoughShips = player->availableFleet->useShip(shipType);
 	if (!enoughShips) return Result.shipsExcess;
 
-	for (int i = 0; i < shipLength; i++) {
-		if (direction == NORTH) board->setCell(startX, startY + i, SHIP_CHAR);
-		else if (direction == SOUTH) board->setCell(startX, startY - i, SHIP_CHAR);
-		else if (direction == EAST) board->setCell(startX - i, startY, SHIP_CHAR);
-		else if (direction == WEST) board->setCell(startX + i, startY, SHIP_CHAR);
-	}
+	for (int x = startX; x <= endX; x++)
+		for (int y = startY; y <= endY; y++)
+			board->setCell(x, y, SHIP_CHAR);
 
 	return Result.success;
 }

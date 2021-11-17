@@ -8,6 +8,7 @@ enum COMMANDS {
 enum DIRECTIONS { NORTH, EAST, SOUTH, WEST };
 enum PLAYERS { ALICE, BOB }; // [A]lice = 0, [B]ob = 1
 enum SHIPS { CARRIER, BATTLESHIP, CRUISER, DESTROYER };
+enum CELLS { EMPTY_CELLS, OUTSIDE_BOARD, SHIP_CELLS, REEF_CELLS };
 
 const int MAX_NUMBER_OF_SHIPS = 10;
 const int NUMBER_OF_SHIP_TYPES = 4;
@@ -19,10 +20,11 @@ const int DESTROYER_LENGTH = 2;
 
 
 static const struct Result {
-	const char* PLACE_SHIP[3] = {
-		"NOT IN STARTING POSITION",          // invalidPosition
-		"SHIP ALREADY PRESENT",              // shipAlreadyPresent
-		"ALL SHIPS OF THE CLASS ALREADY SET" // shipsExcess
+	const char* PLACE_SHIP[4] = {
+		"NOT IN STARTING POSITION",           // invalidPosition
+		"SHIP ALREADY PRESENT",               // shipAlreadyPresent
+		"ALL SHIPS OF THE CLASS ALREADY SET", // shipsExcess
+		"PLACING SHIP ON REEF"			      // reef
 	};
 
 	const char* SHOOT[2] = {
@@ -35,10 +37,10 @@ static const struct Result {
 	};
 
 	enum RESULTS {
-		undefined = -2, success = -1,								  // COMMON_RESULTS
-		invalidPosition = 0, shipAlreadyPresent = 1, shipsExcess = 2, // PLACE_SHIP_RESULTS
-		/* invalidPosition = 0, */ notEnoughShips = 1,                // SHOOT_RESULTS
-		otherPlayerExcepted = 0										  // STATE_RESULTS
+		undefined = -2, success = -1,								            // COMMON_RESULTS
+		invalidPosition = 0, shipAlreadyPresent = 1, shipsExcess = 2, reef = 3, // PLACE_SHIP_RESULTS
+		/* invalidPosition = 0, */ notEnoughShips = 1,						    // SHOOT_RESULTS
+		otherPlayerExcepted = 0												    // STATE_RESULTS
 	};
 
 
