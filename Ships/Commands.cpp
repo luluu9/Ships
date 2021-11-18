@@ -26,6 +26,8 @@ int placeShip(Board* board, Player* player, int x, int y, int shipId, int direct
 		return Result.invalidPosition;
 	else if (cellsContent == REEF_CELLS)
 		return Result.reef;
+	else if (cellsContent == OTHER_SHIP_CELLS)
+		return Result.otherShip;
 
 	bool shipAlreadyUsed = player->availableFleet->isShipUsed(shipType, shipId);
 	if (shipAlreadyUsed) return Result.shipAlreadyPresent;
@@ -45,7 +47,8 @@ int placeShip(Board* board, Player* player, int x, int y, int shipId, int direct
 			board->setCell(currentX, currentY, current_char);
 			currentShipPart++;
 		}
-			
+	
+	// board->printBoard(0); // debug
 
 	return Result.success;
 }

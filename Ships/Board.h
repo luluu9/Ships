@@ -39,7 +39,8 @@ struct Board {
 		return false;
 	};
 
-	int getIndex(int x, int y) {
+	int getIndex(int x, int y, int CUSTOM_BOARD_WIDTH=0) {
+		if (CUSTOM_BOARD_WIDTH) return x + y * CUSTOM_BOARD_WIDTH;
 		return x + y * BOARD_WIDTH;
 	};
 
@@ -69,7 +70,7 @@ struct Board {
 	void prepareCustomBoard(char* customCells, int CUSTOM_BOARD_HEIGHT, int CUSTOM_BOARD_WIDTH) {
 		for (int y = 0; y < CUSTOM_BOARD_HEIGHT; y++)
 			for (int x = 0; x < CUSTOM_BOARD_WIDTH; x++)
-				customCells[getIndex(x, y)] = ' ';
+				customCells[getIndex(x, y, CUSTOM_BOARD_WIDTH)] = ' ';
 	};
 
 	void copyCells(char* targetArray) {
@@ -108,6 +109,14 @@ struct Board {
 		return partsRemaining;
 	};
 
+	bool isOccupiedByShip(int x, int y) {
+		if (!isPointInside(x, y)) return false;
+		char cellContent = getCell(x, y);
+		if (cellContent == SHIP_CHAR || cellContent == DAMAGED_CHAR)
+			return true;
+		return false;
+	}
+
 
 	// COMMANDS
 
@@ -126,7 +135,6 @@ struct Board {
 		printf("PARTS REMAINING:: A : %d B : %d\n", partsRemainingPlayerA, partsRemainingPlayerB);
 	};
 
-
 	// check if player can put ship in specified place
 	int checkPlace(int playerId, int startX, int endX, int startY, int endY) {
 		// check if its player's part of board
@@ -144,6 +152,13 @@ struct Board {
 			for (int y = startY; y <= endY; y++)
 				if (isReef(x, y))
 					return REEF_CELLS;
+
+		// check other ships
+		const int cellsAround = 1;
+		for (int x = startX - cellsAround; x <= endX + cellsAround; x++)
+			for (int y = startY - cellsAround; y <= endY + cellsAround; y++)
+				if (isOccupiedByShip(x, y))
+					return OTHER_SHIP_CELLS;
 
 		return EMPTY_CELLS;
 	};
@@ -176,6 +191,7 @@ struct Board {
 	void setReef(int x, int y) {
 		setCell(x, y, REEF_CHAR);
 	};
+
 
 	// DESTROYER
 

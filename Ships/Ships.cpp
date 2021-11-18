@@ -202,13 +202,13 @@ int main() {
 			char playerInitials;
 			int y, x, shipId;
 			char shipDir;
-			char shipType[3];
-			char shipPartsStates[6] = "11111"; // 6 because of \0 end character
+			char shipType[SHIP_TYPE_ABBRV_LENGTH];
+			char shipPartsStates[SHIP_PART_STATES_LENGTH] = "11111"; 
 
 			std::cin >> playerInitials >> y >> x >> shipDir >> 
 				shipId >> shipType >> shipPartsStates;
-			sprintf_s(fullCommand, "SHIP %c %d %d %c %d %s %s", 
-				playerInitials, y, x, shipDir, shipId, shipType, shipPartsStates);
+			sprintf_s(fullCommand, "SHIP %c %d %d %c %d %s", 
+				playerInitials, y, x, shipDir, shipId, shipType);
 
 			int playerId = getPlayerId(playerInitials);
 			Player playerAllocatingShip = Players[playerId];

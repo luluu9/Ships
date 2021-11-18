@@ -20,11 +20,12 @@ const int DESTROYER_LENGTH = 2;
 
 
 static const struct Result {
-	const char* PLACE_SHIP[4] = {
-		"NOT IN STARTING POSITION",           // invalidPosition
-		"SHIP ALREADY PRESENT",               // shipAlreadyPresent
-		"ALL SHIPS OF THE CLASS ALREADY SET", // shipsExcess
-		"PLACING SHIP ON REEF"			      // reef
+	const char* PLACE_SHIP[5] = {
+		"NOT IN STARTING POSITION",            // invalidPosition
+		"SHIP ALREADY PRESENT",                // shipAlreadyPresent
+		"ALL SHIPS OF THE CLASS ALREADY SET",  // shipsExcess
+		"PLACING SHIP ON REEF", 		       // reef
+		"PLACING SHIP TOO CLOSE TO OTHER SHIP" // otherShip
 	};
 
 	const char* SHOOT[2] = {
@@ -37,10 +38,11 @@ static const struct Result {
 	};
 
 	enum RESULTS {
-		undefined = -2, success = -1,								            // COMMON_RESULTS
-		invalidPosition = 0, shipAlreadyPresent = 1, shipsExcess = 2, reef = 3, // PLACE_SHIP_RESULTS
-		/* invalidPosition = 0, */ notEnoughShips = 1,						    // SHOOT_RESULTS
-		otherPlayerExcepted = 0												    // STATE_RESULTS
+		undefined = -2, success = -1,								       // COMMON_RESULTS
+		invalidPosition = 0, shipAlreadyPresent = 1, shipsExcess = 2,	   // PLACE_SHIP_RESULTS
+		reef = 3, otherShip = 4,										   // -------------
+		/* invalidPosition = 0, */ notEnoughShips = 1,					   // SHOOT_RESULTS
+		otherPlayerExcepted = 0											   // STATE_RESULTS
 	};
 
 
