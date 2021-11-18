@@ -6,7 +6,7 @@
 
 // places ship on the board if it is possible
 // x, y is the bow of the ship
-int placeShip(Board* board, Player* player, int x, int y, int shipId, int direction, int shipType, char shipPartsStates[6]) {
+int placeShip(Board* board, Player* player, int x, int y, int shipId, int direction, int shipType, char shipPartsStates[SHIP_PART_STATES_LENGTH]) {
 	int shipLength = getShipLength(shipType);
 	int startX = x, endX = x, startY = y, endY = y;
 

@@ -120,11 +120,11 @@ int main() {
 	Board *board = new Board();
 	board->prepareBoard();
 
-	Player Players[2] = {};
+	Player Players[NUMBER_OF_PLAYERS] = {};
 	Players[0].id = ALICE;
 	Players[1].id = BOB;
 
-	char command[100], fullCommand[100];
+	char command[COMMAND_MAX_CHARS], fullCommand[COMMAND_MAX_CHARS];
 	int currentStatePlayer = -1, previousStatePlayer = -2;
 	
 	while (std::cin >> command) {
@@ -152,8 +152,8 @@ int main() {
 			Player playerPlacingShip = Players[currentStatePlayer];
 			int y, x, shipId;
 			char shipDir;
-			char shipType[3]; // The classes are denoted by [CAR]RIER, [BAT]TLESHIP, [CRU]ISER, [DES]TROYER.
-			char shipPartsStates[6] = "11111";
+			char shipType[SHIP_TYPE_ABBRV_LENGTH]; // The classes are denoted by [CAR]RIER, [BAT]TLESHIP, [CRU]ISER, [DES]TROYER.
+			char shipPartsStates[SHIP_PART_STATES_LENGTH] = "11111";
 			std::cin >> y >> x >> shipDir >> shipId >> shipType;
 
 			sprintf_s(fullCommand, "PLACE_SHIP %d %d %c %d %s",
