@@ -153,6 +153,7 @@ int main() {
 			int y, x, shipId;
 			char shipDir;
 			char shipType[3]; // The classes are denoted by [CAR]RIER, [BAT]TLESHIP, [CRU]ISER, [DES]TROYER.
+			char shipPartsStates[6] = "11111";
 			std::cin >> y >> x >> shipDir >> shipId >> shipType;
 
 			sprintf_s(fullCommand, "PLACE_SHIP %d %d %c %d %s",
@@ -161,7 +162,8 @@ int main() {
 			int result = placeShip(board, &playerPlacingShip,
 				x, y, shipId,
 				getDirectionId(shipDir),
-				getShipTypeId(shipType));
+				getShipTypeId(shipType),
+				shipPartsStates);
 
 			handleResult(PLACE_SHIP, result, fullCommand);
 			break;
@@ -195,7 +197,31 @@ int main() {
 			sprintf_s(fullCommand, "REEF %d %d", y, x);
 			board->setReef(x, y);
 			break;
+		}		
+		case SHIP: {
+			char playerInitials;
+			int y, x, shipId;
+			char shipDir;
+			char shipType[3];
+			char shipPartsStates[6] = "11111"; // 6 because of \0 end character
+
+			std::cin >> playerInitials >> y >> x >> shipDir >> 
+				shipId >> shipType >> shipPartsStates;
+			sprintf_s(fullCommand, "SHIP %c %d %d %c %d %s %s", 
+				playerInitials, y, x, shipDir, shipId, shipType, shipPartsStates);
+
+			int playerId = getPlayerId(playerInitials);
+			Player playerAllocatingShip = Players[playerId];
+			int result = placeShip(board, &playerAllocatingShip,
+				x, y, shipId,
+				getDirectionId(shipDir),
+				getShipTypeId(shipType),
+				shipPartsStates);
+
+			handleResult(PLACE_SHIP, result, fullCommand);
+			break;
 		}
+		
 		case CLEAR: {
 			board->prepareBoard();
 			break;

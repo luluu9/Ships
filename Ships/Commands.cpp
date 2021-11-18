@@ -6,7 +6,7 @@
 
 // places ship on the board if it is possible
 // x, y is the bow of the ship
-int placeShip(Board *board, Player* player, int x, int y, int shipId, int direction, int shipType) {
+int placeShip(Board* board, Player* player, int x, int y, int shipId, int direction, int shipType, char shipPartsStates[6]) {
 	int shipLength = getShipLength(shipType);
 	int startX = x, endX = x, startY = y, endY = y;
 
@@ -33,9 +33,19 @@ int placeShip(Board *board, Player* player, int x, int y, int shipId, int direct
 	bool enoughShips = player->availableFleet->useShip(shipType);
 	if (!enoughShips) return Result.shipsExcess;
 
-	for (int x = startX; x <= endX; x++)
-		for (int y = startY; y <= endY; y++)
-			board->setCell(x, y, SHIP_CHAR);
+	int currentShipPart = 0;
+	char current_char;
+	for (int currentX = startX; currentX <= endX; currentX++)
+		for (int currentY = startY; currentY <= endY; currentY++) {
+			if (direction == NORTH || direction == WEST || direction == EAST)
+				current_char = shipPartsStates[currentShipPart] == '1' ? SHIP_CHAR : DAMAGED_CHAR;
+			else // for SOUTH
+				current_char = shipPartsStates[shipLength-1-currentShipPart] == '1' ? SHIP_CHAR : DAMAGED_CHAR;
+			
+			board->setCell(currentX, currentY, current_char);
+			currentShipPart++;
+		}
+			
 
 	return Result.success;
 }
@@ -69,3 +79,4 @@ void setFleet(Player* player) {
 		player->availableFleet->remainingShips[shipType] = quantity - usedShipsNumber;
 	}
 }
+
