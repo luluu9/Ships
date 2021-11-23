@@ -207,8 +207,8 @@ int main() {
 
 			std::cin >> playerInitials >> y >> x >> shipDir >> 
 				shipId >> shipType >> shipPartsStates;
-			sprintf_s(fullCommand, "SHIP %c %d %d %c %d %s", 
-				playerInitials, y, x, shipDir, shipId, shipType);
+			sprintf_s(fullCommand, "SHIP %c %d %d %c %d %s %s", 
+				playerInitials, y, x, shipDir, shipId, shipType, shipPartsStates);
 
 			int playerId = getPlayerId(playerInitials);
 			Player playerAllocatingShip = Players[playerId];
