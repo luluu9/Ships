@@ -6,8 +6,8 @@
 
 // places ship on the board if it is possible
 // x, y is the bow of the ship
-int placeShip(Board* board, Player* player, int x, int y, int shipId, int direction, int shipType, char shipPartsStates[SHIP_PART_STATES_LENGTH]) {
-	int shipLength = getShipLength(shipType);
+int placeShip(Board* board, Player* player, int x, int y, int shipId, int direction, int shipTypeId, char shipPartsStates[SHIP_PART_STATES_LENGTH]) {
+	int shipLength = getShipLength(shipTypeId);
 	int startX = x, endX = x, startY = y, endY = y;
 
 	// -1 because startY takes one cell
@@ -29,10 +29,10 @@ int placeShip(Board* board, Player* player, int x, int y, int shipId, int direct
 	else if (cellsContent == OTHER_SHIP_CELLS)
 		return Result.otherShip;
 
-	bool shipAlreadyUsed = player->availableFleet->isShipUsed(shipType, shipId);
+	bool shipAlreadyUsed = player->availableFleet->isShipUsed(shipTypeId, shipId);
 	if (shipAlreadyUsed) return Result.shipAlreadyPresent;
 
-	bool enoughShips = player->availableFleet->useShip(shipType);
+	bool enoughShips = player->availableFleet->useShip(x, y, direction, shipTypeId, shipId);
 	if (!enoughShips) return Result.shipsExcess;
 
 	int currentShipPart = 0;
@@ -72,14 +72,14 @@ int shoot(Board* board, Player players[2], int x, int y) {
 // set number of each ship for player
 void setFleet(Player* player) {
 	int quantity;
-	for (int shipType = CARRIER; shipType <= DESTROYER; shipType++) {
+	for (int shipTypeId = CARRIER; shipTypeId <= DESTROYER; shipTypeId++) {
 		std::cin >> quantity;
-		int actualShipsNumber = player->availableFleet->shipsNumber[shipType];
-		int actualShipsRemaining = player->availableFleet->shipsNumber[shipType];
+		int actualShipsNumber = player->availableFleet->shipsNumber[shipTypeId];
+		int actualShipsRemaining = player->availableFleet->shipsNumber[shipTypeId];
 		int usedShipsNumber = actualShipsNumber - actualShipsRemaining;
 
-		player->availableFleet->shipsNumber[shipType] = quantity;
-		player->availableFleet->remainingShips[shipType] = quantity - usedShipsNumber;
+		player->availableFleet->shipsNumber[shipTypeId] = quantity;
+		player->availableFleet->remainingShips[shipTypeId] = quantity - usedShipsNumber;
 	}
 }
 
