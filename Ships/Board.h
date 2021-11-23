@@ -193,7 +193,7 @@ struct Board {
 	};
 
 
-	// DESTROYER
+	// DESTRUCTOR
 
 	~Board() {
 		delete[] cells;

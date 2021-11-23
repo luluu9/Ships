@@ -221,7 +221,6 @@ int main() {
 			handleResult(PLACE_SHIP, result, fullCommand);
 			break;
 		}
-		
 		case CLEAR: {
 			board->prepareBoard();
 			break;

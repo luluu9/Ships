@@ -42,12 +42,12 @@ int placeShip(Board* board, Player* player, int x, int y, int shipId, int direct
 			if (direction == NORTH || direction == WEST || direction == EAST)
 				current_char = shipPartsStates[currentShipPart] == '1' ? SHIP_CHAR : DAMAGED_CHAR;
 			else // for SOUTH
-				current_char = shipPartsStates[shipLength-1-currentShipPart] == '1' ? SHIP_CHAR : DAMAGED_CHAR;
-			
+				current_char = shipPartsStates[shipLength - 1 - currentShipPart] == '1' ? SHIP_CHAR : DAMAGED_CHAR;
+
 			board->setCell(currentX, currentY, current_char);
 			currentShipPart++;
 		}
-	
+
 	// board->printBoard(0); // debug
 
 	return Result.success;
@@ -57,7 +57,7 @@ int placeShip(Board* board, Player* player, int x, int y, int shipId, int direct
 // returns if shot hits
 // the shoot is at a position in the board (FIELD DOES NOT EXIST),
 // and that all ships that should be placed were already placed (NOT ALL SHIPS PLACED)
-int shoot(Board *board, Player players[2], int x, int y) {
+int shoot(Board* board, Player players[2], int x, int y) {
 	if (!board->isPointInside(x, y)) return Result.invalidPosition;
 	if (!players[ALICE].availableFleet->areAllShipsPlaced()) return Result.notEnoughShips;
 	if (!players[BOB].availableFleet->areAllShipsPlaced()) return Result.notEnoughShips;
