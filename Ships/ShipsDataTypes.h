@@ -4,12 +4,13 @@ enum COMMANDS {
 	DO_NOTHING, OTHER_PLAYER_TURN, END_TURN, STATE,          // FUNDAMENTAL COMMANDS
 	PRINT, SET_FLEET, NEXT_PLAYER, PLACE_SHIP, SHOOT, CLEAR, // BASIC
 	BOARD_SIZE, INIT_POSITION, REEF, SHIP, EXTENDED_SHIPS,   // EXTENDED
-	SET_AI_PLAYER, /*PRINT,*/ SRAND, SAVE					 // --------
+	SET_AI_PLAYER, /*PRINT,*/ SRAND, SAVE, MOVE				 // --------
 };
 enum DIRECTIONS { NORTH, EAST, SOUTH, WEST };
 enum PLAYERS { ALICE, BOB }; // [A]lice = 0, [B]ob = 1
 enum SHIPS { CARRIER, BATTLESHIP, CRUISER, DESTROYER };
 enum CELLS { EMPTY_CELLS, OUTSIDE_BOARD, REEF_CELLS, OTHER_SHIP_CELLS };
+enum MOVE_DIRECTIONS { LEFT = -1, FORWARD, RIGHT = 1 };
 
 const int NUMBER_OF_PLAYERS = 2;
 
@@ -48,12 +49,22 @@ static const struct Result {
 		"THE OTHER PLAYER EXPECTED"
 	};
 
+	const char* MOVE[5] = {
+		"SHIP CANNOT MOVE",
+		"SHIP MOVED ALREADY",
+		"PLACING SHIP ON REEF",
+		"SHIP WENT FROM BOARD",
+		"PLACING SHIP TOO CLOSE TO OTHER SHIP",
+	};
+
 	enum RESULTS {
 		undefined = -2, success = -1,								       // COMMON_RESULTS
 		invalidPosition = 0, shipAlreadyPresent = 1, shipsExcess = 2,	   // PLACE_SHIP_RESULTS
 		reef = 3, otherShip = 4,										   // -------------
 		/* invalidPosition = 0, */ notEnoughShips = 1,					   // SHOOT_RESULTS
-		otherPlayerExcepted = 0											   // STATE_RESULTS
+		otherPlayerExcepted = 0,										   // STATE_RESULTS
+		shipBrokenEngine = 0, shipNoMoves = 1, shipOnReef = 2,			   // MOVE_RESULTS
+		shipOutsideBoard = 3, shipTooClose = 4							   // -------------
 	};
 
 
@@ -65,6 +76,11 @@ struct Ship {
 	int shipTypeId;
 	int shipId;
 	int movesRemaining = DEFAULT_SHIPS_MOVES;
+
+	// should these commands be there or in Commands.cpp file?
+	int placeShip() {
+		// pass
+	}
 
 	int move(int direction) {
 		// pass

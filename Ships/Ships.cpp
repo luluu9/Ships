@@ -69,7 +69,8 @@ int handleInput(char* command, int* currentStatePlayer, int* previousStatePlayer
 		}
 		else {
 			if (commandId == PLACE_SHIP ||
-				commandId == SHOOT)
+				commandId == SHOOT ||
+				commandId == MOVE)
 				return commandId;
 		}
 	}
@@ -117,16 +118,18 @@ void handleResult(int commandId, int resultId, char* commandText) {
 // (Y-axis)
 // board[y][x]
 int main() {
-	Board *board = new Board();
-	board->prepareBoard();
+
 
 	Player Players[NUMBER_OF_PLAYERS] = {};
 	Players[0].id = ALICE;
 	Players[1].id = BOB;
 
+	Board* board = new Board();
+	board->prepareBoard(Players);
+
 	char command[COMMAND_MAX_CHARS], fullCommand[COMMAND_MAX_CHARS];
 	int currentStatePlayer = -1, previousStatePlayer = -2;
-	
+
 	while (std::cin >> command) {
 		switch (handleInput(command, &currentStatePlayer, &previousStatePlayer)) {
 		case PRINT: {
@@ -163,7 +166,8 @@ int main() {
 				x, y, shipId,
 				getDirectionId(shipDir),
 				getShipTypeId(shipType),
-				shipPartsStates);
+				shipPartsStates,
+				true);
 
 			handleResult(PLACE_SHIP, result, fullCommand);
 			break;
@@ -197,17 +201,17 @@ int main() {
 			sprintf_s(fullCommand, "REEF %d %d", y, x);
 			board->setReef(x, y);
 			break;
-		}		
+		}
 		case SHIP: {
 			char playerInitials;
 			int y, x, shipId;
 			char shipDir;
 			char shipType[SHIP_TYPE_ABBRV_LENGTH];
-			char shipPartsStates[SHIP_PART_STATES_LENGTH] = "11111"; 
+			char shipPartsStates[SHIP_PART_STATES_LENGTH] = "11111";
 
-			std::cin >> playerInitials >> y >> x >> shipDir >> 
+			std::cin >> playerInitials >> y >> x >> shipDir >>
 				shipId >> shipType >> shipPartsStates;
-			sprintf_s(fullCommand, "SHIP %c %d %d %c %d %s %s", 
+			sprintf_s(fullCommand, "SHIP %c %d %d %c %d %s %s",
 				playerInitials, y, x, shipDir, shipId, shipType, shipPartsStates);
 
 			int playerId = getPlayerId(playerInitials);
@@ -216,13 +220,33 @@ int main() {
 				x, y, shipId,
 				getDirectionId(shipDir),
 				getShipTypeId(shipType),
-				shipPartsStates);
+				shipPartsStates,
+				true);
 
 			handleResult(PLACE_SHIP, result, fullCommand);
 			break;
 		}
+		case MOVE: {
+			int shipId;
+			char shipType[SHIP_TYPE_ABBRV_LENGTH];
+			char moveDir;
+
+			std::cin >> shipId >> shipType >> moveDir;
+			sprintf_s(fullCommand, "MOVE %i %s %c", shipId, shipType, moveDir);
+
+			Player playerMovingShip = Players[currentStatePlayer];
+			int shipTypeId = getShipTypeId(shipType);
+			int moveDirId = getMoveDirectionId(moveDir);
+			//playerMovingShip.availableFleet->ships[shipTypeId][shipId].move
+			Ship* ship = playerMovingShip.availableFleet->ships[shipTypeId][shipId];
+			move(board, &playerMovingShip, ship, moveDirId);
+
+			// handleResult(MOVE, result, fullCommand);
+			break;
+
+		}
 		case CLEAR: {
-			board->prepareBoard();
+			board->clearBoard();
 			break;
 		}
 		case OTHER_PLAYER_TURN: {

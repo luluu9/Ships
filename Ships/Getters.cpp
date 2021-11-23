@@ -17,6 +17,7 @@ int getCommandId(char* command) {
 	if (strcmp(command, "SET_AI_PLAYER") == 0) return SET_AI_PLAYER;
 	if (strcmp(command, "SRAND") == 0) return SRAND;
 	if (strcmp(command, "SAVE") == 0) return SAVE;
+	if (strcmp(command, "MOVE") == 0) return MOVE;
 	std::cout << "GOT BAD COMMAND IN getCommandId FUNCTION" << std::endl;
 	return -1;
 }
@@ -56,5 +57,13 @@ int getShipLength(int shipTypeId) {
 	if (shipTypeId == CRUISER) return CRUISER_LENGTH;
 	if (shipTypeId == DESTROYER) return DESTROYER_LENGTH;
 	std::cout << "GOT BAD SHIP TYPE ID IN getShipLength FUNCTION" << std::endl;
+	return -1;
+}
+
+int getMoveDirectionId(char moveChar) {
+	if (moveChar == 'F') return FORWARD;
+	if (moveChar == 'L') return LEFT;
+	if (moveChar == 'R') return RIGHT;
+	std::cout << "GOT BAD MOVE CHAR IN getMoveDirectionId FUNCTION" << std::endl;
 	return -1;
 }

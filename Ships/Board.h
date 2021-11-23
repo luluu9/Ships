@@ -9,6 +9,7 @@ const int DEFAULT_BOARD_HEIGHT = 21;
 const char SHIP_CHAR = '+';
 const char DAMAGED_CHAR = 'x';
 const char DIVIDING_LINE_CHAR = ' ';
+const char EMPTY_CELL = ' ';
 const char REEF_CHAR = '#';
 
 
@@ -16,6 +17,7 @@ struct Board {
 	int BOARD_WIDTH = DEFAULT_BOARD_WIDTH;
 	int BOARD_HEIGHT = DEFAULT_BOARD_HEIGHT;
 	char* cells = new char[BOARD_WIDTH * BOARD_HEIGHT];
+	Player* players[NUMBER_OF_PLAYERS];
 
 	// Player's rectangle allows Player to place ships in specified area (inclusive)
 	enum rectangleIndexes { minXInd, minYInd, maxXInd, maxYInd };
@@ -58,11 +60,16 @@ struct Board {
 			printf("BAD INDEX FOR setCell METHOD: (%d, %d)", x, y);
 	};
 
-	void prepareBoard() {
+	void clearBoard() {
 		for (int y = 0; y < BOARD_HEIGHT; y++)
 			for (int x = 0; x < BOARD_WIDTH; x++)
 				cells[getIndex(x, y)] = ' ';
 	};
+
+	void prepareBoard(Player players[NUMBER_OF_PLAYERS]) {
+		clearBoard();
+		players = players;
+	}
 
 
 	// FOR RESIZING BOARD
@@ -136,12 +143,16 @@ struct Board {
 	};
 
 	// check if player can put ship in specified place
-	int checkPlace(int playerId, int startX, int endX, int startY, int endY) {
-		// check if its player's part of board
-		if (startX < playersRectangle[playerId][minXInd] || endX > playersRectangle[playerId][maxXInd])
-			return OUTSIDE_BOARD;
-		if (startY < playersRectangle[playerId][minYInd] || endY > playersRectangle[playerId][maxYInd])
-			return OUTSIDE_BOARD;
+	int checkPlace(int playerId, int startX, int endX, int startY, int endY, bool starting=false) {
+		// check this only if players are deploying ships on game start
+		if (starting) { 
+			// check if its player's part of board
+			if (startX < playersRectangle[playerId][minXInd] || endX > playersRectangle[playerId][maxXInd])
+				return OUTSIDE_BOARD;
+			if (startY < playersRectangle[playerId][minYInd] || endY > playersRectangle[playerId][maxYInd])
+				return OUTSIDE_BOARD;
+		}
+
 
 		// check borders
 		if (!isPointInside(startX, startY)) return OUTSIDE_BOARD;
