@@ -118,21 +118,20 @@ struct Fleet {
 	// on corresponding to SHIPS enum indexes
 	int shipsNumber[NUMBER_OF_SHIP_TYPES] = { 1, 2, 3, 4 };
 	int remainingShips[NUMBER_OF_SHIP_TYPES] = { 1, 2, 3, 4 };
+	// if id of ship is used, corresponding cell equals to 1
 	int shipUsedIds[NUMBER_OF_SHIP_TYPES][MAX_NUMBER_OF_SHIPS] = { };
 	Ship* ships[NUMBER_OF_SHIP_TYPES][MAX_NUMBER_OF_SHIPS] = { };
 
 	bool useShip(int x, int y, int direction, int shipTypeId, int shipId) {
 		if (remainingShips[shipTypeId] <= 0) return false;
 		remainingShips[shipTypeId] -= 1;
+		shipUsedIds[shipTypeId][shipId] = 1;
 		ships[shipTypeId][shipId] = new Ship(x, y, direction, shipTypeId, shipId);
 		return true;
 	}
 
 	bool isShipUsed(int shipType, int shipId) const {
-		int usedShipsNumber = shipsNumber[shipType] - remainingShips[shipType];
-		for (int i = 0; i < usedShipsNumber; i++)
-			if (shipUsedIds[shipType][i] == shipId)
-				return true;
+		if (shipUsedIds[shipType][shipId] == 1) return true;
 		return false;
 	}
 
