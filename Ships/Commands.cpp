@@ -32,8 +32,10 @@ int placeShip(Board* board, Player* player, int x, int y, int shipId, int direct
 	bool shipAlreadyUsed = player->availableFleet->isShipUsed(shipTypeId, shipId);
 	if (shipAlreadyUsed) return Result.shipAlreadyPresent;
 
-	bool enoughShips = player->availableFleet->useShip(x, y, direction, shipTypeId, shipId);
+	bool enoughShips = player->availableFleet->useShip(x, y, direction, shipTypeId, shipId, shipPartsStates);
 	if (!enoughShips) return Result.shipsExcess;
+
+	Ship* ship = player->availableFleet->ships[shipTypeId][shipId];
 
 	int currentShipPart = 0;
 	char current_char;
@@ -44,7 +46,7 @@ int placeShip(Board* board, Player* player, int x, int y, int shipId, int direct
 			else // for SOUTH
 				current_char = shipPartsStates[shipLength - 1 - currentShipPart] == '1' ? SHIP_CHAR : DAMAGED_CHAR;
 
-			board->setCell(currentX, currentY, current_char);
+			board->setCell(currentX, currentY, current_char, ship);
 			currentShipPart++;
 		}
 
@@ -61,9 +63,13 @@ int shoot(Board* board, Player players[2], int x, int y) {
 	if (!board->isPointInside(x, y)) return Result.invalidPosition;
 	if (!players[ALICE].availableFleet->areAllShipsPlaced()) return Result.notEnoughShips;
 	if (!players[BOB].availableFleet->areAllShipsPlaced()) return Result.notEnoughShips;
+	
+	Ship* attackedShip = board->getShipPtr(x, y);
 
-	if (board->getCell(x, y) == SHIP_CHAR)
-		board->setCell(x, y, DAMAGED_CHAR);
+	if (attackedShip != nullptr) {
+		board->setCell(x, y, DAMAGED_CHAR, attackedShip);
+		attackedShip->gotShot(x, y);
+	}
 
 	return Result.success;
 }
@@ -139,7 +145,7 @@ int move(Board* board, Player* player, Ship* ship, int moveDirection) {
 	for (int currentX = newStartX; currentX <= newEndX; currentX++)
 		for (int currentY = newStartY; currentY <= newEndY; currentY++) {
 			char current_char = shipPartsChars[currentShipPart];
-			board->setCell(currentX, currentY, current_char);
+			board->setCell(currentX, currentY, current_char, ship);
 			currentShipPart++;
 		}
 
@@ -162,7 +168,7 @@ int move(Board* board, Player* player, Ship* ship, int moveDirection) {
 	}
 
 	// board->printBoard(0); // debug
-	delete shipPartsChars;
+	delete[] shipPartsChars;
 	return 0;
 }
 

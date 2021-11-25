@@ -1,4 +1,6 @@
 #pragma once
+#include "Getters.h"
+#include "string.h"
 
 enum COMMANDS {
 	DO_NOTHING, OTHER_PLAYER_TURN, END_TURN, STATE,          // FUNDAMENTAL COMMANDS
@@ -29,6 +31,9 @@ const int SHIP_TYPE_ABBRV_LENGTH = 2;
 const int SHIP_PART_STATES_LENGTH = 6; // 6 because of \0 end character
 
 const int COMMAND_MAX_CHARS = 100;
+
+const char DESTROYED_PART_CHAR_ID = '0';
+const char VALID_PART_CHAR_ID = '1';
 
 
 static const struct Result {
@@ -73,21 +78,24 @@ static const struct Result {
 
 struct Ship {
 	int x, y, direction;
+	int endX, endY;
 	int shipTypeId;
 	int shipId;
 	int movesRemaining = DEFAULT_SHIPS_MOVES;
+	int shipLength;
+	char partsState[SHIP_PART_STATES_LENGTH] = {};
 
 	// should these commands be there or in Commands.cpp file?
 	int placeShip() {
 		// pass
 	}
 
-	int move(int direction) {
+	int move(int n_direction) {
 		// pass
 		return 1;
 	}
 
-	int shoot(int x, int y) {
+	int shoot(int n_x, int n_y) {
 		// pass
 		return 1;
 	}
@@ -99,13 +107,42 @@ struct Ship {
 			movesRemaining = DEFAULT_SHIPS_MOVES;
 	}
 
-	Ship(int n_x, int n_y, int n_direction, int n_shipTypeId, int n_shipId) {
+	int getDestroyedPartsAmount() {
+		int destroyedParts = 0;
+		for (int i = 0; i < shipLength; i++)
+			if (partsState[i] == DESTROYED_PART_CHAR_ID)
+				destroyedParts++;
+		return destroyedParts;
+	}
+
+	int getValidPartsRemaining() {
+		return (shipLength - getDestroyedPartsAmount());
+	}
+
+	void gotShot(int impactX, int impactY) {
+		int destroyedPartId = -1;
+		// translate impact coordinates with corresponding directions
+		// to get destroyed id in partsStates
+		if (direction == NORTH || direction == SOUTH)
+			destroyedPartId = abs(impactY - y);
+		else
+			destroyedPartId = abs(x - impactX);	
+		partsState[destroyedPartId] = DESTROYED_PART_CHAR_ID;
+	}
+
+	Ship() {}
+	Ship(int n_x, int n_y, int n_direction, int n_shipTypeId, int n_shipId, char* n_partsStates) {
 		x = n_x;
 		y = n_y;
 		direction = n_direction;
 		shipTypeId = n_shipTypeId;
 		shipId = n_shipId;
+		shipLength = getShipLength(shipTypeId);
+		strncpy_s(partsState, sizeof(char)*(SHIP_PART_STATES_LENGTH), n_partsStates, shipLength+1);
 		resetTurn();
+	}
+
+	~Ship() {
 	}
 };
 
@@ -122,11 +159,12 @@ struct Fleet {
 	int shipUsedIds[NUMBER_OF_SHIP_TYPES][MAX_NUMBER_OF_SHIPS] = { };
 	Ship* ships[NUMBER_OF_SHIP_TYPES][MAX_NUMBER_OF_SHIPS] = { };
 
-	bool useShip(int x, int y, int direction, int shipTypeId, int shipId) {
+	bool useShip(int x, int y, int direction, int shipTypeId, int shipId, char *shipPartsStates) {
 		if (remainingShips[shipTypeId] <= 0) return false;
 		remainingShips[shipTypeId] -= 1;
 		shipUsedIds[shipTypeId][shipId] = 1;
-		ships[shipTypeId][shipId] = new Ship(x, y, direction, shipTypeId, shipId);
+
+		ships[shipTypeId][shipId] = new Ship(x, y, direction, shipTypeId, shipId, shipPartsStates);
 		return true;
 	}
 

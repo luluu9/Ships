@@ -17,7 +17,9 @@ struct Board {
 	int BOARD_WIDTH = DEFAULT_BOARD_WIDTH;
 	int BOARD_HEIGHT = DEFAULT_BOARD_HEIGHT;
 	char* cells = new char[BOARD_WIDTH * BOARD_HEIGHT];
-	Player* players[NUMBER_OF_PLAYERS];
+	// array of pointers to ships on corresponding cells
+	Ship** shipCells = new Ship*[BOARD_WIDTH * BOARD_HEIGHT];
+	Player *players;
 
 	// Player's rectangle allows Player to place ships in specified area (inclusive)
 	enum rectangleIndexes { minXInd, minYInd, maxXInd, maxYInd };
@@ -53,47 +55,61 @@ struct Board {
 		return 0;
 	};
 
-	void setCell(int x, int y, char new_value) {
-		if (isPointInside(x, y))
-			cells[getIndex(x, y)] = new_value;
+	void setCell(int x, int y, char new_value, Ship* shipPtr=nullptr) {
+		if (isPointInside(x, y)) {
+			int index = getIndex(x, y);
+			cells[index] = new_value;
+			shipCells[index] = shipPtr;
+		}
 		else
 			printf("BAD INDEX FOR setCell METHOD: (%d, %d)", x, y);
 	};
 
 	void clearBoard() {
 		for (int y = 0; y < BOARD_HEIGHT; y++)
-			for (int x = 0; x < BOARD_WIDTH; x++)
-				cells[getIndex(x, y)] = ' ';
+			for (int x = 0; x < BOARD_WIDTH; x++) {
+				int index = getIndex(x, y);
+				cells[index] = ' ';
+				shipCells[index] = nullptr;
+			}
+
 	};
 
-	void prepareBoard(Player players[NUMBER_OF_PLAYERS]) {
+	void prepareBoard(Player *n_players) {
 		clearBoard();
-		players = players;
+		players = n_players;
 	}
 
 
 	// FOR RESIZING BOARD
 
-	void prepareCustomBoard(char* customCells, int CUSTOM_BOARD_HEIGHT, int CUSTOM_BOARD_WIDTH) {
+	void prepareCustomBoard(char* customCells, Ship** customShipCells, int CUSTOM_BOARD_HEIGHT, int CUSTOM_BOARD_WIDTH) {
 		for (int y = 0; y < CUSTOM_BOARD_HEIGHT; y++)
-			for (int x = 0; x < CUSTOM_BOARD_WIDTH; x++)
-				customCells[getIndex(x, y, CUSTOM_BOARD_WIDTH)] = ' ';
+			for (int x = 0; x < CUSTOM_BOARD_WIDTH; x++) {
+				int index = getIndex(x, y, CUSTOM_BOARD_WIDTH);
+				customCells[index] = ' ';
+				customShipCells[index] = nullptr;
+			}
 	};
 
-	void copyCells(char* targetArray) {
+	void copyCells(char* targetArray, Ship** targetShipsArray) {
 		for (int y = 0; y < BOARD_HEIGHT; y++)
 			for (int x = 0; x < BOARD_WIDTH; x++) {
 				int currentIndex = getIndex(x, y);
 				targetArray[currentIndex] = cells[currentIndex];
+				targetShipsArray[currentIndex] = shipCells[currentIndex];
 			}
 	};
 
 	void setBoardSize(int newWidth, int newHeight) {
 		char* newCells = new char[newWidth * newHeight];
-		prepareCustomBoard(newCells, newWidth, newHeight);
-		copyCells(newCells);
+		Ship** newShipCells = new Ship * [newWidth * newHeight];
+		prepareCustomBoard(newCells, newShipCells, newWidth, newHeight);
+		copyCells(newCells, newShipCells);
 		delete[] cells;
+		delete[] shipCells;
 		cells = newCells;
+		shipCells = newShipCells;
 		BOARD_WIDTH = newWidth;
 		BOARD_HEIGHT = newHeight;
 	};
@@ -103,14 +119,12 @@ struct Board {
 
 	int countPartsRemaining(int playerId) {
 		int partsRemaining = 0;
-		int startY = playersRectangle[playerId][minYInd];
-		int endY = playersRectangle[playerId][maxYInd];
-		int startX = playersRectangle[playerId][minXInd];
-		int endX = playersRectangle[playerId][maxXInd];
-		for (int y = startY; y <= endY; y++) {
-			for (int x = startX; x <= endX; x++) {
-				if (getCell(x, y) == SHIP_CHAR)
-					partsRemaining++;
+		Player player = players[playerId];
+		for (int i = 0; i < NUMBER_OF_SHIP_TYPES; i++) {
+			for (int j = 0; j < MAX_NUMBER_OF_SHIPS; j++) {
+				Ship* currentShip = player.availableFleet->ships[i][j];
+				if (currentShip != nullptr)
+					partsRemaining += currentShip->getValidPartsRemaining();
 			}
 		}
 		return partsRemaining;
@@ -122,6 +136,10 @@ struct Board {
 		if (cellContent == SHIP_CHAR || cellContent == DAMAGED_CHAR)
 			return true;
 		return false;
+	}
+
+	Ship* getShipPtr(int x, int y) {
+		return shipCells[getIndex(x, y)];
 	}
 
 
