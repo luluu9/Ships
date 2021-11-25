@@ -78,27 +78,26 @@ static const struct Result {
 
 struct Ship {
 	int x, y, direction;
-	int endX, endY;
 	int shipTypeId;
 	int shipId;
 	int movesRemaining = DEFAULT_SHIPS_MOVES;
 	int shipLength;
 	char partsState[SHIP_PART_STATES_LENGTH] = {};
 
-	// should these commands be there or in Commands.cpp file?
-	int placeShip() {
-		// pass
-	}
+	//// should these commands be there or in Commands.cpp file?
+	//int placeShip() {
+	//	// pass
+	//}
 
-	int move(int n_direction) {
-		// pass
-		return 1;
-	}
+	//int move(int n_direction) {
+	//	// pass
+	//	return 1;
+	//}
 
-	int shoot(int n_x, int n_y) {
-		// pass
-		return 1;
-	}
+	//int shoot(int n_x, int n_y) {
+	//	// pass
+	//	return 1;
+	//}
 
 	void resetTurn() {
 		if (shipTypeId == 1)
@@ -107,7 +106,7 @@ struct Ship {
 			movesRemaining = DEFAULT_SHIPS_MOVES;
 	}
 
-	int getDestroyedPartsAmount() {
+	int getDestroyedPartsAmount() const {
 		int destroyedParts = 0;
 		for (int i = 0; i < shipLength; i++)
 			if (partsState[i] == DESTROYED_PART_CHAR_ID)
@@ -115,7 +114,7 @@ struct Ship {
 		return destroyedParts;
 	}
 
-	int getValidPartsRemaining() {
+	int getValidPartsRemaining() const {
 		return (shipLength - getDestroyedPartsAmount());
 	}
 
@@ -130,7 +129,6 @@ struct Ship {
 		partsState[destroyedPartId] = DESTROYED_PART_CHAR_ID;
 	}
 
-	Ship() {}
 	Ship(int n_x, int n_y, int n_direction, int n_shipTypeId, int n_shipId, char* n_partsStates) {
 		x = n_x;
 		y = n_y;

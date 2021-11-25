@@ -255,7 +255,7 @@ int main() {
 			break;
 		}
 		case END_TURN: {
-			int winner = board->checkWinner(Players);
+			int winner = board->checkWinner();
 			if (winner == ALICE || winner == BOB) {
 				printf("%c won", winner == ALICE ? 'A' : 'B');
 				exit(0);

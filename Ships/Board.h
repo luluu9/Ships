@@ -18,7 +18,7 @@ struct Board {
 	int BOARD_HEIGHT = DEFAULT_BOARD_HEIGHT;
 	char* cells = new char[BOARD_WIDTH * BOARD_HEIGHT];
 	// array of pointers to ships on corresponding cells
-	Ship** shipCells = new Ship*[BOARD_WIDTH * BOARD_HEIGHT];
+	void** shipCells = new void*[BOARD_WIDTH * BOARD_HEIGHT];
 	Player *players;
 
 	// Player's rectangle allows Player to place ships in specified area (inclusive)
@@ -31,24 +31,24 @@ struct Board {
 
 	// BASE METHODS
 
-	bool isPointInside(int x, int y) {
+	bool isPointInside(int x, int y) const {
 		if (x < 0 || y < 0) return false;
 		if (x >= BOARD_WIDTH || y >= BOARD_HEIGHT) return false;
 		return true;
 	};
 
-	bool isReef(int x, int y) {
+	bool isReef(int x, int y) const {
 		if (cells[getIndex(x, y)] == REEF_CHAR)
 			return true;
 		return false;
 	};
 
-	int getIndex(int x, int y, int CUSTOM_BOARD_WIDTH=0) {
+	int getIndex(int x, int y, int CUSTOM_BOARD_WIDTH=0) const {
 		if (CUSTOM_BOARD_WIDTH) return x + y * CUSTOM_BOARD_WIDTH;
 		return x + y * BOARD_WIDTH;
 	};
 
-	char getCell(int x, int y) {
+	char getCell(int x, int y) const {
 		if (isPointInside(x, y))
 			return cells[getIndex(x, y)];
 		printf("BAD INDEX FOR getCell METHOD: (%d, %d)", x, y);
@@ -83,7 +83,7 @@ struct Board {
 
 	// FOR RESIZING BOARD
 
-	void prepareCustomBoard(char* customCells, Ship** customShipCells, int CUSTOM_BOARD_HEIGHT, int CUSTOM_BOARD_WIDTH) {
+	void prepareCustomBoard(char* customCells, void** customShipCells, int CUSTOM_BOARD_HEIGHT, int CUSTOM_BOARD_WIDTH) const {
 		for (int y = 0; y < CUSTOM_BOARD_HEIGHT; y++)
 			for (int x = 0; x < CUSTOM_BOARD_WIDTH; x++) {
 				int index = getIndex(x, y, CUSTOM_BOARD_WIDTH);
@@ -92,7 +92,7 @@ struct Board {
 			}
 	};
 
-	void copyCells(char* targetArray, Ship** targetShipsArray) {
+	void copyCells(char* targetArray, void** targetShipsArray) const	{
 		for (int y = 0; y < BOARD_HEIGHT; y++)
 			for (int x = 0; x < BOARD_WIDTH; x++) {
 				int currentIndex = getIndex(x, y);
@@ -103,7 +103,7 @@ struct Board {
 
 	void setBoardSize(int newWidth, int newHeight) {
 		char* newCells = new char[newWidth * newHeight];
-		Ship** newShipCells = new Ship * [newWidth * newHeight];
+		void** newShipCells = new void* [newWidth * newHeight];
 		prepareCustomBoard(newCells, newShipCells, newWidth, newHeight);
 		copyCells(newCells, newShipCells);
 		delete[] cells;
@@ -117,7 +117,7 @@ struct Board {
 
 	// HELPERS
 
-	int countPartsRemaining(int playerId) {
+	int countPartsRemaining(int playerId) const {
 		int partsRemaining = 0;
 		Player player = players[playerId];
 		for (int i = 0; i < NUMBER_OF_SHIP_TYPES; i++) {
@@ -130,7 +130,7 @@ struct Board {
 		return partsRemaining;
 	};
 
-	bool isOccupiedByShip(int x, int y) {
+	bool isOccupiedByShip(int x, int y) const {
 		if (!isPointInside(x, y)) return false;
 		char cellContent = getCell(x, y);
 		if (cellContent == SHIP_CHAR || cellContent == DAMAGED_CHAR)
@@ -138,14 +138,14 @@ struct Board {
 		return false;
 	}
 
-	Ship* getShipPtr(int x, int y) {
-		return shipCells[getIndex(x, y)];
+	Ship* getShipPtr(int x, int y) const {
+		return static_cast<Ship*>(shipCells[getIndex(x, y)]);
 	}
 
 
 	// COMMANDS
 
-	void printBoard(int printMode) {
+	void printBoard(int printMode) const {
 		int partsRemainingPlayerA = countPartsRemaining(ALICE);
 		int partsRemainingPlayerB = countPartsRemaining(BOB);
 		if (partsRemainingPlayerA == 0 && partsRemainingPlayerB == 0)
@@ -161,7 +161,7 @@ struct Board {
 	};
 
 	// check if player can put ship in specified place
-	int checkPlace(int playerId, int startX, int endX, int startY, int endY, bool starting=false) {
+	int checkPlace(int playerId, int startX, int endX, int startY, int endY, bool starting=false) const {
 		// check this only if players are deploying ships on game start
 		if (starting) { 
 			// check if its player's part of board
@@ -194,7 +194,7 @@ struct Board {
 
 	// returns id of winning Player
 	// if there is no winner, returns -1
-	int checkWinner(Player players[2]) {
+	int checkWinner() const {
 		// all ships have to be placed
 		bool playerAplacedAll = players[ALICE].availableFleet->areAllShipsPlaced();
 		bool playerBplacedAll = players[BOB].availableFleet->areAllShipsPlaced();

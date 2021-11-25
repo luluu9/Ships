@@ -82,7 +82,9 @@ int move(Board* board, Player* player, Ship* ship, int moveDirection) {
 	if (ship->movesRemaining <= 0) return Result.shipNoMoves;
 
 	int shipLength = getShipLength(ship->shipTypeId);
-	int startX = ship->x, endX = ship->x, startY = ship->y, endY = ship->y;
+	int startX, endX, startY, endY;
+	startY = endY = ship->y;
+	startX = endX = ship->x;
 
 	// -1 because startY takes one cell
 	if (ship->direction == NORTH) endY = ship->y + shipLength - 1;
@@ -120,7 +122,7 @@ int move(Board* board, Player* player, Ship* ship, int moveDirection) {
 	// firstly, we have to clear previous ship cells
 	// and read states of the ship parts
 	int currentShipPart = 0;
-	int* shipPartsChars = new int[shipLength];
+	char* shipPartsChars = new char[shipLength+1]; // +1 bcs of \0
 	for (int currentX = startX; currentX <= endX; currentX++)
 		for (int currentY = startY; currentY <= endY; currentY++) {
 			shipPartsChars[currentShipPart] = board->getCell(currentX, currentY);
@@ -130,12 +132,15 @@ int move(Board* board, Player* player, Ship* ship, int moveDirection) {
 
 	// checkPlace doesnt work, because it detected old position of ship
 	int cellsContent = board->checkPlace(player->id, newStartX, newEndX, newStartY, newEndY);
-	if (cellsContent == OUTSIDE_BOARD)
-		return Result.shipOutsideBoard;
-	else if (cellsContent == REEF_CELLS)
-		return Result.shipOnReef;
-	else if (cellsContent == OTHER_SHIP_CELLS)
-		return Result.shipTooClose;
+	if (cellsContent != EMPTY_CELLS) {
+		delete[] shipPartsChars;
+		if (cellsContent == OUTSIDE_BOARD)
+			return Result.shipOutsideBoard;
+		else if (cellsContent == REEF_CELLS)
+			return Result.shipOnReef;
+		else if (cellsContent == OTHER_SHIP_CELLS)
+			return Result.shipTooClose;
+	}
 
 	
 	// everything OK, lets move
