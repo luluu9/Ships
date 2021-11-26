@@ -4,17 +4,16 @@
 #include "Board.h"
 
 
-// places ship on the board if it is possible
-// x, y is the bow of the ship
-int placeShip(Board* board, Player* player, int x, int y, int shipId, int direction, int shipTypeId, char shipPartsStates[SHIP_PART_STATES_LENGTH], bool gameStart=false) {
-	int shipLength = getShipLength(shipTypeId);
-	int startX = x, endX = x, startY = y, endY = y;
-
+int prepareShip(int x, int y,
+	int& startX, int& endX, int& startY, int& endY,
+	int direction, int shipLength,
+	Board* board, Player* player, bool gameStart)
+{
 	// -1 because startY takes one cell
-	if (direction == NORTH) endY = y + shipLength - 1;
-	else if (direction == SOUTH) endY = y - shipLength + 1;
-	else if (direction == EAST) endX = x - shipLength + 1;
-	else if (direction == WEST) endX = x + shipLength - 1;
+	if (direction == NORTH) endY = startY + shipLength - 1;
+	else if (direction == SOUTH) endY = startY - shipLength + 1;
+	else if (direction == EAST) endX = startX - shipLength + 1;
+	else if (direction == WEST) endX = startX + shipLength - 1;
 	else return Result.undefined;
 
 	// make sure that startPos is smaller or equal to endPos
@@ -28,6 +27,28 @@ int placeShip(Board* board, Player* player, int x, int y, int shipId, int direct
 		return Result.reef;
 	else if (cellsContent == OTHER_SHIP_CELLS)
 		return Result.otherShip;
+
+	return Result.success;
+}
+
+
+
+// places ship on the board if it is possible
+// x, y is the bow of the ship
+int placeShip(Board* board, Player* player,
+	int x, int y, int shipId, int direction,
+	int shipTypeId, char shipPartsStates[SHIP_PART_STATES_LENGTH],
+	bool gameStart = false) {
+	int shipLength = getShipLength(shipTypeId);
+	int startX = x, endX = x, startY = y, endY = y;
+
+	int result = prepareShip(x, y, startX, endX, startY, endY,
+		direction, shipLength,
+		board, player, gameStart);
+
+	if (result != Result.success) {
+		return result;
+	}
 
 	bool shipAlreadyUsed = player->availableFleet->isShipUsed(shipTypeId, shipId);
 	if (shipAlreadyUsed) return Result.shipAlreadyPresent;
@@ -63,7 +84,7 @@ int shoot(Board* board, Player players[2], int x, int y) {
 	if (!board->isPointInside(x, y)) return Result.invalidPosition;
 	if (!players[ALICE].availableFleet->areAllShipsPlaced()) return Result.notEnoughShips;
 	if (!players[BOB].availableFleet->areAllShipsPlaced()) return Result.notEnoughShips;
-	
+
 	Ship* attackedShip = board->getShipPtr(x, y);
 
 	if (attackedShip != nullptr) {
@@ -118,11 +139,66 @@ int move(Board* board, Player* player, Ship* ship, int moveDirection) {
 			newEndX = endX - 1;
 		}
 	}
+	else if (moveDirection == RIGHT) {
+		if (ship->direction == NORTH) {
+			newEndY = newStartY = startY + 1;
+			newStartX = startX + shipLength - 1;
+			newEndX = startX;
+			ship->direction = EAST;
+		}
+		else if (ship->direction == SOUTH) {
+			newEndY = newStartY = startY - 1;
+			newStartX = startX - shipLength + 1;
+			newEndX = startX;
+			ship->direction = WEST;
+		}
+		else if (ship->direction == EAST) {
+			newEndX = newStartX = startX + 1;
+			newEndY = endY;
+			newStartY = endY + shipLength - 1;
+			ship->direction = SOUTH;
+		}
+		else if (ship->direction == WEST) {
+			newEndX = newStartX = startX - 1;
+			newEndY = endY;
+			newStartY = endY - shipLength + 1;
+			ship->direction = NORTH;
+		}
+	}
+	else if (moveDirection == LEFT) {
+		if (ship->direction == NORTH) {
+			newEndY = newStartY = startY + 1;
+			newStartX = startX - shipLength + 1;
+			newEndX = startX;
+			ship->direction = WEST;
+		}
+		else if (ship->direction == SOUTH) {
+			newEndY = newStartY = startY - 1;
+			newStartX = startX + shipLength - 1;
+			newEndX = startX;
+			ship->direction = EAST;
+		}
+		else if (ship->direction == EAST) {
+			newEndX = newStartX = startX + 1;
+			newEndY = endY;
+			newStartY = endY - shipLength + 1;
+			ship->direction = NORTH;
+		}
+		else if (ship->direction == WEST) {
+			newEndX = newStartX = startX - 1;
+			newEndY = endY;
+			newStartY = endY + shipLength - 1;
+			ship->direction = SOUTH;
+		}
+	}
+
+	if (newStartX > newEndX) std::swap(newStartX, newEndX);
+	if (newStartY > newEndY) std::swap(newStartY, newEndY);
 
 	// firstly, we have to clear previous ship cells
 	// and read states of the ship parts
 	int currentShipPart = 0;
-	char* shipPartsChars = new char[shipLength+1]; // +1 bcs of \0
+	char* shipPartsChars = new char[shipLength + 1]; // +1 bcs of \0
 	for (int currentX = startX; currentX <= endX; currentX++)
 		for (int currentY = startY; currentY <= endY; currentY++) {
 			shipPartsChars[currentShipPart] = board->getCell(currentX, currentY);
@@ -142,7 +218,7 @@ int move(Board* board, Player* player, Ship* ship, int moveDirection) {
 			return Result.shipTooClose;
 	}
 
-	
+
 	// everything OK, lets move
 
 	currentShipPart = 0;
@@ -172,9 +248,11 @@ int move(Board* board, Player* player, Ship* ship, int moveDirection) {
 		ship->y = newStartY;
 	}
 
+	ship->movesRemaining--;
+
 	// board->printBoard(0); // debug
 	delete[] shipPartsChars;
-	return 0;
+	return Result.success;
 }
 
 

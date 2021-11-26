@@ -104,6 +104,11 @@ void handleResult(int commandId, int resultId, char* commandText) {
 		printProblem(commandText, problemText);
 		break;
 	}
+	case MOVE: {
+		const char* problemText = Result.MOVE[resultId];
+		printProblem(commandText, problemText);
+		break;
+	}
 	}
 	exit(0);
 }
@@ -239,9 +244,9 @@ int main() {
 			int moveDirId = getMoveDirectionId(moveDir);
 			//playerMovingShip.availableFleet->ships[shipTypeId][shipId].move
 			Ship* ship = playerMovingShip.availableFleet->ships[shipTypeId][shipId];
-			move(board, &playerMovingShip, ship, moveDirId);
+			int result = move(board, &playerMovingShip, ship, moveDirId);
 
-			// handleResult(MOVE, result, fullCommand);
+			handleResult(MOVE, result, fullCommand);
 			break;
 
 		}
