@@ -50,36 +50,39 @@ int handleInput(char* command, int* currentStatePlayer, int* previousStatePlayer
 			return OTHER_PLAYER_TURN;
 
 		int commandId = getCommandId(command);
-		
-		if (extendedShips) {
-			if (commandId == BASE_SHOOT) {
-				commandId = EXT_SHOOT;
-			}
-		}
 
-		// TODO: change this
-		if (stateCommands) {
-			if (commandId == PRINT ||
-				commandId == SET_FLEET ||
-				commandId == NEXT_PLAYER ||
-				commandId == BOARD_SIZE ||
-				commandId == INIT_POSITION ||
-				commandId == REEF ||
-				commandId == SHIP ||
-				commandId == EXTENDED_SHIPS ||
-				commandId == SET_AI_PLAYER ||
-				commandId == SRAND ||
-				commandId == SAVE
-				)
-				return commandId;
-		}
-		else {
-			if (commandId == PLACE_SHIP ||
-				commandId == BASE_SHOOT ||
-				commandId == EXT_SHOOT ||
-				commandId == MOVE)
-				return commandId;
-		}
+		if (extendedShips && commandId == BASE_SHOOT)
+			commandId = EXT_SHOOT;
+
+
+		if (stateCommands && commandId == PRINT)
+			commandId = PRINT_STATE;
+
+
+			// TODO: change this
+			if (stateCommands) {
+				if (commandId == PRINT_STATE ||
+					commandId == SET_FLEET ||
+					commandId == NEXT_PLAYER ||
+					commandId == BOARD_SIZE ||
+					commandId == INIT_POSITION ||
+					commandId == REEF ||
+					commandId == SHIP ||
+					commandId == EXTENDED_SHIPS ||
+					commandId == SET_AI_PLAYER ||
+					commandId == SRAND ||
+					commandId == SAVE
+					)
+					return commandId;
+			}
+			else {
+				if (commandId == PLACE_SHIP ||
+					commandId == BASE_SHOOT ||
+					commandId == EXT_SHOOT ||
+					commandId == MOVE || 
+					commandId == PRINT)
+					return commandId;
+			}
 	}
 
 	if (turnEnds)
@@ -151,6 +154,12 @@ int main() {
 		case PRINT: {
 			int printMode;
 			std::cin >> printMode;
+			board->printPlayerBoard(printMode, currentStatePlayer);
+			break;
+		}
+		case PRINT_STATE: {
+			int printMode;
+			std::cin >> printMode;
 			board->printBoard(printMode);
 			break;
 		}
@@ -196,7 +205,7 @@ int main() {
 			handleResult(BASE_SHOOT, result, fullCommand);
 			break;
 		}
-		case EXT_SHOOT: { 
+		case EXT_SHOOT: {
 			int shipId, y, x;
 			char shipType[SHIP_TYPE_ABBRV_LENGTH];
 			std::cin >> shipId >> shipType >> y >> x;
@@ -277,7 +286,7 @@ int main() {
 			extendedShips = !extendedShips;
 			break;
 		}
-	
+
 		case CLEAR: {
 			board->clearBoard();
 			break;

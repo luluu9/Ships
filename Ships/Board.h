@@ -160,6 +160,17 @@ struct Board {
 		printf("PARTS REMAINING:: A : %d B : %d\n", partsRemainingPlayerA, partsRemainingPlayerB);
 	};
 
+	void printPlayerBoard(int printMode, int playerId) {
+		printf("%s", playerId == 0 ? "ALICE" : "BOB");
+
+		for (int y = 0; y < BOARD_HEIGHT; y++) {
+			for (int x = 0; x < BOARD_WIDTH; x++) {
+				std::cout << getCell(x, y);
+			}
+			std::cout << std::endl;
+		}
+	}
+
 	// check if player can put ship in specified place
 	int checkPlace(int playerId, int startX, int endX, int startY, int endY, bool starting=false) const {
 		// check this only if players are deploying ships on game start
