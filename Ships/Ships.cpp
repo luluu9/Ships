@@ -26,7 +26,7 @@ bool switchPlayerTurn(int currentCommandPlayerId, bool* playerCommandsToChange, 
 }
 
 
-int handleInput(char* command, int* currentStatePlayer, int* previousStatePlayer) {
+int handleInput(char* command, int* currentStatePlayer, int* previousStatePlayer, bool extendedShips) {
 	static bool stateCommands = false;
 	static bool playerACommands = false;
 	static bool playerBCommands = false;
@@ -50,6 +50,12 @@ int handleInput(char* command, int* currentStatePlayer, int* previousStatePlayer
 			return OTHER_PLAYER_TURN;
 
 		int commandId = getCommandId(command);
+		
+		if (extendedShips) {
+			if (commandId == BASE_SHOOT) {
+				commandId = EXT_SHOOT;
+			}
+		}
 
 		// TODO: change this
 		if (stateCommands) {
@@ -69,7 +75,8 @@ int handleInput(char* command, int* currentStatePlayer, int* previousStatePlayer
 		}
 		else {
 			if (commandId == PLACE_SHIP ||
-				commandId == SHOOT ||
+				commandId == BASE_SHOOT ||
+				commandId == EXT_SHOOT ||
 				commandId == MOVE)
 				return commandId;
 		}
@@ -94,7 +101,12 @@ void handleResult(int commandId, int resultId, char* commandText) {
 		printProblem(commandText, problemText);
 		break;
 	}
-	case SHOOT: {
+	case BASE_SHOOT: {
+		const char* problemText = Result.SHOOT[resultId];
+		printProblem(commandText, problemText);
+		break;
+	}
+	case EXT_SHOOT: {
 		const char* problemText = Result.SHOOT[resultId];
 		printProblem(commandText, problemText);
 		break;
@@ -123,8 +135,6 @@ void handleResult(int commandId, int resultId, char* commandText) {
 // (Y-axis)
 // board[y][x]
 int main() {
-
-
 	Player Players[NUMBER_OF_PLAYERS] = {};
 	Players[0].id = ALICE;
 	Players[1].id = BOB;
@@ -134,9 +144,10 @@ int main() {
 
 	char command[COMMAND_MAX_CHARS], fullCommand[COMMAND_MAX_CHARS];
 	int currentStatePlayer = -1, previousStatePlayer = -2;
+	bool extendedShips = false;
 
 	while (std::cin >> command) {
-		switch (handleInput(command, &currentStatePlayer, &previousStatePlayer)) {
+		switch (handleInput(command, &currentStatePlayer, &previousStatePlayer, extendedShips)) {
 		case PRINT: {
 			int printMode;
 			std::cin >> printMode;
@@ -177,12 +188,24 @@ int main() {
 			handleResult(PLACE_SHIP, result, fullCommand);
 			break;
 		}
-		case SHOOT: { // Shooting can only start if all the ships were placed.
+		case BASE_SHOOT: { // Shooting can only start if all the ships were placed.
 			int x, y;
 			std::cin >> y >> x;
 			sprintf_s(fullCommand, "SHOOT %d %d", y, x);
-			int result = shoot(board, Players, x, y);
-			handleResult(SHOOT, result, fullCommand);
+			int result = shoot(board, Players, x, y, extendedShips);
+			handleResult(BASE_SHOOT, result, fullCommand);
+			break;
+		}
+		case EXT_SHOOT: { 
+			int shipId, y, x;
+			char shipType[SHIP_TYPE_ABBRV_LENGTH];
+			std::cin >> shipId >> shipType >> y >> x;
+			int shipTypeId = getShipTypeId(shipType);
+			Ship* shootingShip = Players[currentStatePlayer].availableFleet->getShip(shipId, shipTypeId);
+
+			sprintf_s(fullCommand, "SHOOT %d %d", y, x);
+			int result = shoot(board, Players, x, y, extendedShips, shootingShip);
+			handleResult(BASE_SHOOT, result, fullCommand);
 			break;
 		}
 		case BOARD_SIZE: {
@@ -250,6 +273,11 @@ int main() {
 			break;
 
 		}
+		case EXTENDED_SHIPS: {
+			extendedShips = !extendedShips;
+			break;
+		}
+	
 		case CLEAR: {
 			board->clearBoard();
 			break;
@@ -264,6 +292,9 @@ int main() {
 			if (winner == ALICE || winner == BOB) {
 				printf("%c won", winner == ALICE ? 'A' : 'B');
 				exit(0);
+			}
+			for (int i = 0; i < NUMBER_OF_PLAYERS; i++) {
+				Players[i].availableFleet->resetMoves();
 			}
 			break;
 		}

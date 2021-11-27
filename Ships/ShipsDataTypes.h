@@ -3,10 +3,10 @@
 #include "string.h"
 
 enum COMMANDS {
-	DO_NOTHING, OTHER_PLAYER_TURN, END_TURN, STATE,          // FUNDAMENTAL COMMANDS
-	PRINT, SET_FLEET, NEXT_PLAYER, PLACE_SHIP, SHOOT, CLEAR, // BASIC
-	BOARD_SIZE, INIT_POSITION, REEF, SHIP, EXTENDED_SHIPS,   // EXTENDED
-	SET_AI_PLAYER, /*PRINT,*/ SRAND, SAVE, MOVE				 // --------
+	DO_NOTHING, OTHER_PLAYER_TURN, END_TURN, STATE,               // FUNDAMENTAL COMMANDS
+	PRINT, SET_FLEET, NEXT_PLAYER, PLACE_SHIP, BASE_SHOOT, CLEAR, // BASIC
+	BOARD_SIZE, INIT_POSITION, REEF, SHIP, EXTENDED_SHIPS,		  // EXTENDED
+	SET_AI_PLAYER, /*PRINT,*/ SRAND, SAVE, MOVE, EXT_SHOOT		  // --------
 };
 enum DIRECTIONS { NORTH, EAST, SOUTH, WEST };
 enum PLAYERS { ALICE, BOB }; // [A]lice = 0, [B]ob = 1
@@ -175,6 +175,17 @@ struct Fleet {
 		for (int i = 0; i < NUMBER_OF_SHIP_TYPES; i++)
 			if (remainingShips[i] > 0) return false;
 		return true;
+	}
+
+	Ship* getShip(int shipId, int shipTypeId) const {
+		return ships[shipTypeId][shipId];
+	}
+
+	void resetMoves() {
+		for (int i = 0; i < NUMBER_OF_SHIP_TYPES; i++)
+			for (int j = 0; j < MAX_NUMBER_OF_SHIPS; j++)
+				if (ships[i][j] != nullptr)
+					ships[i][j]->resetTurn();
 	}
 };
 

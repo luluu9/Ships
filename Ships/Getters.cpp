@@ -7,7 +7,7 @@ int getCommandId(char* command) {
 	if (strcmp(command, "SET_FLEET") == 0) return SET_FLEET;
 	if (strcmp(command, "NEXT_PLAYER") == 0) return NEXT_PLAYER;
 	if (strcmp(command, "PLACE_SHIP") == 0) return PLACE_SHIP;
-	if (strcmp(command, "SHOOT") == 0) return SHOOT;
+	if (strcmp(command, "SHOOT") == 0) return BASE_SHOOT;
 	if (strcmp(command, "CLEAR") == 0) return CLEAR;
 	if (strcmp(command, "BOARD_SIZE") == 0) return BOARD_SIZE;
 	if (strcmp(command, "INIT_POSITION") == 0) return INIT_POSITION;
