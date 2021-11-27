@@ -142,6 +142,13 @@ struct Ship {
 		return true;
 	}
 
+
+	bool radarWorks() const {
+		if (partsState[0] == DESTROYED_PART_CHAR_ID)
+			return false;
+		return true;
+	}
+
 	double calcDistance(double x1, double x2, double y1, double y2) const {
 		return sqrt(pow(abs(y1 - y2), 2) + pow(abs(x1 - x2), 2));
 	}
@@ -229,6 +236,12 @@ struct Fleet {
 			for (int j = 0; j < MAX_NUMBER_OF_SHIPS; j++)
 				if (ships[i][j] != nullptr)
 					ships[i][j]->resetTurn();
+	}
+
+	Fleet() {
+		for (int i = 0; i < NUMBER_OF_SHIP_TYPES; i++)
+			for (int j = 0; j < MAX_NUMBER_OF_SHIPS; j++)
+				ships[i][j] = nullptr;
 	}
 };
 

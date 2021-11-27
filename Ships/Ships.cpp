@@ -154,7 +154,8 @@ int main() {
 		case PRINT: {
 			int printMode;
 			std::cin >> printMode;
-			board->printPlayerBoard(printMode, currentStatePlayer);
+			Player* currentPlayer = &Players[currentStatePlayer];
+			board->printPlayerBoard(printMode, currentPlayer);
 			break;
 		}
 		case PRINT_STATE: {

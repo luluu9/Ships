@@ -18,8 +18,8 @@ struct Board {
 	int BOARD_HEIGHT = DEFAULT_BOARD_HEIGHT;
 	char* cells = new char[BOARD_WIDTH * BOARD_HEIGHT];
 	// array of pointers to ships on corresponding cells
-	void** shipCells = new void*[BOARD_WIDTH * BOARD_HEIGHT];
-	Player *players;
+	void** shipCells = new void* [BOARD_WIDTH * BOARD_HEIGHT];
+	Player* players;
 
 	// Player's rectangle allows Player to place ships in specified area (inclusive)
 	enum rectangleIndexes { minXInd, minYInd, maxXInd, maxYInd };
@@ -43,7 +43,7 @@ struct Board {
 		return false;
 	};
 
-	int getIndex(int x, int y, int CUSTOM_BOARD_WIDTH=0) const {
+	int getIndex(int x, int y, int CUSTOM_BOARD_WIDTH = 0) const {
 		if (CUSTOM_BOARD_WIDTH) return x + y * CUSTOM_BOARD_WIDTH;
 		return x + y * BOARD_WIDTH;
 	};
@@ -55,7 +55,7 @@ struct Board {
 		return 0;
 	};
 
-	void setCell(int x, int y, char new_value, Ship* shipPtr=nullptr) {
+	void setCell(int x, int y, char new_value, Ship* shipPtr = nullptr) {
 		if (isPointInside(x, y)) {
 			int index = getIndex(x, y);
 			cells[index] = new_value;
@@ -75,7 +75,7 @@ struct Board {
 
 	};
 
-	void prepareBoard(Player *n_players) {
+	void prepareBoard(Player* n_players) {
 		clearBoard();
 		players = n_players;
 	}
@@ -92,7 +92,7 @@ struct Board {
 			}
 	};
 
-	void copyCells(char* targetArray, void** targetShipsArray) const	{
+	void copyCells(char* targetArray, void** targetShipsArray) const {
 		for (int y = 0; y < BOARD_HEIGHT; y++)
 			for (int x = 0; x < BOARD_WIDTH; x++) {
 				int currentIndex = getIndex(x, y);
@@ -160,21 +160,55 @@ struct Board {
 		printf("PARTS REMAINING:: A : %d B : %d\n", partsRemainingPlayerA, partsRemainingPlayerB);
 	};
 
-	void printPlayerBoard(int printMode, int playerId) {
-		printf("%s", playerId == 0 ? "ALICE" : "BOB");
+	void printPlayerBoard(int printMode, Player* player) {
+		//printf("%s", player->id == 0 ? "ALICE" : "BOB");
 
+		bool* visibleCells = new bool[BOARD_WIDTH * BOARD_HEIGHT];
+		for (int y = 0; y < BOARD_HEIGHT; y++)
+			for (int x = 0; x < BOARD_WIDTH; x++)
+				visibleCells[getIndex(x, y)] = false;
+
+		Ship* (*ships)[NUMBER_OF_SHIP_TYPES][MAX_NUMBER_OF_SHIPS] = &player->availableFleet->ships;
+		for (int i = 0; i < NUMBER_OF_SHIP_TYPES; i++)
+			for (int j = 0; j < MAX_NUMBER_OF_SHIPS; j++)
+				if (player->availableFleet->ships[i][j] != nullptr) {
+					Ship* ship = player->availableFleet->ships[i][j];
+					int shipLength = ship->shipLength;
+					int shipX = ship->x;
+					int shipY = ship->y;
+					int radarCells = shipLength;
+					if (!ship->radarWorks()) {
+						// make this ship visible 
+						radarCells = 1;
+					}
+					for (int x = shipX - radarCells; x <= shipX + radarCells; x++)
+						for (int y = shipY - radarCells; y <= shipY + radarCells; y++) {
+							if (!isPointInside(x, y))
+								continue;
+							double distance = ship->calcDistance(shipX, x, shipY, y);
+							if (distance <= radarCells)
+								visibleCells[getIndex(x, y)] = true;
+						}
+				}
+
+	
 		for (int y = 0; y < BOARD_HEIGHT; y++) {
 			for (int x = 0; x < BOARD_WIDTH; x++) {
-				std::cout << getCell(x, y);
+				if (visibleCells[getIndex(x, y)] == true)
+					std::cout << getCell(x, y);
+				else
+					std::cout << '?';
 			}
 			std::cout << std::endl;
 		}
+
+		delete[] visibleCells;
 	}
 
 	// check if player can put ship in specified place
-	int checkPlace(int playerId, int startX, int endX, int startY, int endY, bool starting=false) const {
+	int checkPlace(int playerId, int startX, int endX, int startY, int endY, bool starting = false) const {
 		// check this only if players are deploying ships on game start
-		if (starting) { 
+		if (starting) {
 			// check if its player's part of board
 			if (startX < playersRectangle[playerId][minXInd] || endX > playersRectangle[playerId][maxXInd])
 				return OUTSIDE_BOARD;
