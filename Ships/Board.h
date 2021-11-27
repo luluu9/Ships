@@ -178,7 +178,21 @@ struct Board {
 					int shipY = ship->y;
 					int radarCells = shipLength;
 					if (!ship->radarWorks()) {
+						int direction = ship->direction;
+						int startX = shipX, endX = shipX, startY = shipY, endY = shipY;
 						// make this ship visible 
+						if (direction == NORTH) endY = startY + shipLength - 1;
+						else if (direction == SOUTH) endY = startY - shipLength + 1;
+						else if (direction == EAST) endX = startX - shipLength + 1;
+						else if (direction == WEST) endX = startX + shipLength - 1;
+
+						if (startX > endX) std::swap(startX, endX);
+						if (startY > endY) std::swap(startY, endY);
+
+						for (int currentX = startX; currentX <= endX; currentX++)
+							for (int currentY = startY; currentY <= endY; currentY++)
+								visibleCells[getIndex(currentX, currentY)] = true;
+
 						radarCells = 1;
 					}
 					for (int x = shipX - radarCells; x <= shipX + radarCells; x++)
