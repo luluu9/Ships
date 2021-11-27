@@ -88,8 +88,13 @@ int basicShoot(Board* board, int x, int y) {
 	return Result.success;
 }
 
-int extendedShoot(Board* board, Player players[2], int x, int y) {
+int extendedShoot(Board* board, Ship* shootingShip, int x, int y) {
 	Ship* attackedShip = board->getShipPtr(x, y);
+
+	int result = shootingShip->canShoot(x, y);
+
+	if (result != Result.success) 
+		return result;
 
 	if (attackedShip != nullptr) {
 		board->setCell(x, y, DAMAGED_CHAR, attackedShip);
@@ -103,13 +108,13 @@ int extendedShoot(Board* board, Player players[2], int x, int y) {
 // returns if shot hits
 // the shoot is at a position in the board (FIELD DOES NOT EXIST),
 // and that all ships that should be placed were already placed (NOT ALL SHIPS PLACED)
-int shoot(Board* board, Player players[2], int x, int y, bool extendedShips, Ship* shootingShip) {
+int shoot(Board* board, Player players[2], int x, int y, bool extendedShips, Ship* shootingShip = nullptr) {
 	if (!board->isPointInside(x, y)) return Result.invalidPosition;
 	if (!players[ALICE].availableFleet->areAllShipsPlaced()) return Result.notEnoughShips;
 	if (!players[BOB].availableFleet->areAllShipsPlaced()) return Result.notEnoughShips;
 
-	if (extendedShoot)
-		return extendedShoot(board, players, x, y);
+	if (extendedShips)
+		return extendedShoot(board, shootingShip, x, y);
 	else
 		return basicShoot(board, x, y);
 }

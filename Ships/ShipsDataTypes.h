@@ -45,9 +45,12 @@ static const struct Result {
 		"PLACING SHIP TOO CLOSE TO OTHER SHIP" // otherShip
 	};
 
-	const char* SHOOT[2] = {
+	const char* SHOOT[5] = {
 		"FIELD DOES NOT EXIST",
-		"NOT ALL SHIPS PLACED"
+		"NOT ALL SHIPS PLACED",
+		"SHOOTING TOO FAR",
+		"SHIP CANNOT SHOOT",
+		"TOO MANY SHOOTS"
 	};
 
 	const char* STATE[1] = {
@@ -66,10 +69,11 @@ static const struct Result {
 		undefined = -2, success = -1,								       // COMMON_RESULTS
 		invalidPosition = 0, shipAlreadyPresent = 1, shipsExcess = 2,	   // PLACE_SHIP_RESULTS
 		reef = 3, otherShip = 4,										   // -------------
-		/* invalidPosition = 0, */ notEnoughShips = 1,					   // SHOOT_RESULTS
+		/* invalidPosition = 0, */ notEnoughShips = 1, shootTooFar = 2,	   // SHOOT_RESULTS
+		cannonDestroyed = 3, tooManyShoots = 4,							   // -------------
 		otherPlayerExcepted = 0,										   // STATE_RESULTS
 		shipBrokenEngine = 0, shipNoMoves = 1, shipOnReef = 2,			   // MOVE_RESULTS
-		shipOutsideBoard = 3, shipTooClose = 4							   // -------------
+		shipOutsideBoard = 3, shipTooClose = 4							   // 
 	};
 
 
@@ -81,6 +85,7 @@ struct Ship {
 	int shipTypeId;
 	int shipId;
 	int movesRemaining = DEFAULT_SHIPS_MOVES;
+	int shootsRemaining;
 	int shipLength;
 	char partsState[SHIP_PART_STATES_LENGTH] = {};
 
@@ -104,6 +109,7 @@ struct Ship {
 			movesRemaining = DEFAULT_CARRIER_MOVES;
 		else
 			movesRemaining = DEFAULT_SHIPS_MOVES;
+		shootsRemaining = shipLength;
 	}
 
 	int getDestroyedPartsAmount() const {
@@ -125,8 +131,44 @@ struct Ship {
 		if (direction == NORTH || direction == SOUTH)
 			destroyedPartId = abs(impactY - y);
 		else
-			destroyedPartId = abs(x - impactX);	
+			destroyedPartId = abs(x - impactX);
 		partsState[destroyedPartId] = DESTROYED_PART_CHAR_ID;
+	}
+
+	bool engineWorks() const {
+		if (partsState[shipLength - 1] == DESTROYED_PART_CHAR_ID)
+			return false;
+		return true;
+	}
+
+	double calcDistance(double x1, double x2, double y1, double y2) const {
+		return sqrt(pow(abs(y1 - y2), 2) + pow(abs(x1 - x2), 2));
+	}
+
+	int canShoot(int enemyX, int enemyY) {
+		if (partsState[1] == DESTROYED_PART_CHAR_ID)
+			return Result.cannonDestroyed;
+		if (shootsRemaining <= 0)
+			return Result.tooManyShoots;
+
+		int cannonX = x, cannonY = y;
+		if (direction == NORTH)
+			cannonY = y + 1;
+		else if (direction == EAST)
+			cannonX = x - 1;
+		else if (direction == SOUTH)
+			cannonY = y - 1;
+		else
+			cannonX = x + 1;
+
+		double distance = calcDistance(cannonX, enemyX, cannonY, enemyY);
+		if (shipTypeId == CARRIER || distance <= shipLength) {
+			shootsRemaining--;
+			return Result.success;
+		}
+			
+		return Result.shootTooFar;
+
 	}
 
 	Ship(int n_x, int n_y, int n_direction, int n_shipTypeId, int n_shipId, char* n_partsStates) {
@@ -136,7 +178,7 @@ struct Ship {
 		shipTypeId = n_shipTypeId;
 		shipId = n_shipId;
 		shipLength = getShipLength(shipTypeId);
-		strncpy_s(partsState, sizeof(char)*(SHIP_PART_STATES_LENGTH), n_partsStates, shipLength+1);
+		strncpy_s(partsState, sizeof(char) * (SHIP_PART_STATES_LENGTH), n_partsStates, shipLength + 1);
 		resetTurn();
 	}
 
@@ -157,7 +199,7 @@ struct Fleet {
 	int shipUsedIds[NUMBER_OF_SHIP_TYPES][MAX_NUMBER_OF_SHIPS] = { };
 	Ship* ships[NUMBER_OF_SHIP_TYPES][MAX_NUMBER_OF_SHIPS] = { };
 
-	bool useShip(int x, int y, int direction, int shipTypeId, int shipId, char *shipPartsStates) {
+	bool useShip(int x, int y, int direction, int shipTypeId, int shipId, char* shipPartsStates) {
 		if (remainingShips[shipTypeId] <= 0) return false;
 		remainingShips[shipTypeId] -= 1;
 		shipUsedIds[shipTypeId][shipId] = 1;

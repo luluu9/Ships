@@ -203,9 +203,9 @@ int main() {
 			int shipTypeId = getShipTypeId(shipType);
 			Ship* shootingShip = Players[currentStatePlayer].availableFleet->getShip(shipId, shipTypeId);
 
-			sprintf_s(fullCommand, "SHOOT %d %d", y, x);
+			sprintf_s(fullCommand, "SHOOT %d %s %d %d", shipId, shipType, y, x);
 			int result = shoot(board, Players, x, y, extendedShips, shootingShip);
-			handleResult(BASE_SHOOT, result, fullCommand);
+			handleResult(EXT_SHOOT, result, fullCommand);
 			break;
 		}
 		case BOARD_SIZE: {
