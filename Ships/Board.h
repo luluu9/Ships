@@ -177,6 +177,7 @@ struct Board {
 					int shipX = ship->x;
 					int shipY = ship->y;
 					int radarCells = shipLength;
+					int planesSend = ship->planesSend;
 					if (!ship->radarWorks()) {
 						int direction = ship->direction;
 						int startX = shipX, endX = shipX, startY = shipY, endY = shipY;
@@ -195,6 +196,8 @@ struct Board {
 
 						radarCells = 1;
 					}
+
+					// make visible cells in range of radar
 					for (int x = shipX - radarCells; x <= shipX + radarCells; x++)
 						for (int y = shipY - radarCells; y <= shipY + radarCells; y++) {
 							if (!isPointInside(x, y))
@@ -203,9 +206,21 @@ struct Board {
 							if (distance <= radarCells)
 								visibleCells[getIndex(x, y)] = true;
 						}
+
+					// make visible cells in range of planes
+					for (int i = 0; i < planesSend; i++) {
+						int planeX = ship->planesCoords[i][0];
+						int planeY = ship->planesCoords[i][1];
+						for (int x = planeX - 1; x <= planeX + 1; x++)
+							for (int y = planeY - 1; y <= planeY + 1; y++) {
+								if (!isPointInside(x, y))
+									continue;
+								visibleCells[getIndex(x, y)] = true;
+							}
+					}
 				}
 
-	
+
 		for (int y = 0; y < BOARD_HEIGHT; y++) {
 			for (int x = 0; x < BOARD_WIDTH; x++) {
 				if (visibleCells[getIndex(x, y)] == true)

@@ -79,7 +79,8 @@ int handleInput(char* command, int* currentStatePlayer, int* previousStatePlayer
 				if (commandId == PLACE_SHIP ||
 					commandId == BASE_SHOOT ||
 					commandId == EXT_SHOOT ||
-					commandId == MOVE || 
+					commandId == MOVE ||
+					commandId == SPY ||
 					commandId == PRINT)
 					return commandId;
 			}
@@ -111,6 +112,11 @@ void handleResult(int commandId, int resultId, char* commandText) {
 	}
 	case EXT_SHOOT: {
 		const char* problemText = Result.SHOOT[resultId];
+		printProblem(commandText, problemText);
+		break;
+	}
+	case SPY: {
+		const char* problemText = Result.PLANE[resultId];
 		printProblem(commandText, problemText);
 		break;
 	}
@@ -216,6 +222,16 @@ int main() {
 			sprintf_s(fullCommand, "SHOOT %d %s %d %d", shipId, shipType, y, x);
 			int result = shoot(board, Players, x, y, extendedShips, shootingShip);
 			handleResult(EXT_SHOOT, result, fullCommand);
+			break;
+		}
+		case SPY: {
+			int shipId, y, x;
+			std::cin >> shipId >> y >> x;
+			Ship* sendingPlaneShip = Players[currentStatePlayer].availableFleet->getShip(shipId, CARRIER);
+
+			sprintf_s(fullCommand, "SPY %d %d %d", shipId, y, x);
+			int result = spy(board, sendingPlaneShip, x, y);
+			handleResult(SPY, result, fullCommand);
 			break;
 		}
 		case BOARD_SIZE: {

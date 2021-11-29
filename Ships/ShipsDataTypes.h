@@ -7,7 +7,7 @@ enum COMMANDS {
 	PRINT, SET_FLEET, NEXT_PLAYER, PLACE_SHIP, BASE_SHOOT, CLEAR, // BASIC
 	BOARD_SIZE, INIT_POSITION, REEF, SHIP, EXTENDED_SHIPS,		  // EXTENDED
 	SET_AI_PLAYER, /*PRINT,*/ SRAND, SAVE, MOVE, EXT_SHOOT,		  // --------
-	PRINT_STATE													  // --------
+	PRINT_STATE, SPY												  // --------
 };
 enum DIRECTIONS { NORTH, EAST, SOUTH, WEST };
 enum PLAYERS { ALICE, BOB }; // [A]lice = 0, [B]ob = 1
@@ -63,7 +63,12 @@ static const struct Result {
 		"SHIP MOVED ALREADY",
 		"PLACING SHIP ON REEF",
 		"SHIP WENT FROM BOARD",
-		"PLACING SHIP TOO CLOSE TO OTHER SHIP",
+		"PLACING SHIP TOO CLOSE TO OTHER SHIP"
+	};
+
+	const char* PLANE[2] = {
+		"CANNOT SEND PLANE",
+		"ALL PLANES SENT",
 	};
 
 	enum RESULTS {
@@ -74,7 +79,8 @@ static const struct Result {
 		cannonDestroyed = 3, tooManyShoots = 4,							   // -------------
 		otherPlayerExcepted = 0,										   // STATE_RESULTS
 		shipBrokenEngine = 0, shipNoMoves = 1, shipOnReef = 2,			   // MOVE_RESULTS
-		shipOutsideBoard = 3, shipTooClose = 4							   // 
+		shipOutsideBoard = 3, shipTooClose = 4,							   // -------------
+		cannonPlaneDestroyed = 0, tooManyPlanes = 1						   // PLANE_RESULTS
 	};
 
 
@@ -87,8 +93,16 @@ struct Ship {
 	int shipId;
 	int movesRemaining = DEFAULT_SHIPS_MOVES;
 	int shootsRemaining;
+	int planesRemaining;
 	int shipLength;
 	char partsState[SHIP_PART_STATES_LENGTH] = {};
+
+	const int CANNON_INDEX = 1;
+	const int RADAR_INDEX = 1;
+	int ENGINE_INDEX = 1;
+
+	int planesCoords[CARRIER_LENGTH][2];
+	int planesSend = 0;
 
 	//// should these commands be there or in Commands.cpp file?
 	//int placeShip() {
@@ -106,11 +120,12 @@ struct Ship {
 	//}
 
 	void resetTurn() {
-		if (shipTypeId == 1)
+		if (shipTypeId == CARRIER)
 			movesRemaining = DEFAULT_CARRIER_MOVES;
 		else
 			movesRemaining = DEFAULT_SHIPS_MOVES;
 		shootsRemaining = shipLength;
+		planesSend = 0;
 	}
 
 	int getDestroyedPartsAmount() const {
@@ -137,14 +152,13 @@ struct Ship {
 	}
 
 	bool engineWorks() const {
-		if (partsState[shipLength - 1] == DESTROYED_PART_CHAR_ID)
+		if (partsState[ENGINE_INDEX] == DESTROYED_PART_CHAR_ID)
 			return false;
 		return true;
 	}
 
-
 	bool radarWorks() const {
-		if (partsState[0] == DESTROYED_PART_CHAR_ID)
+		if (partsState[RADAR_INDEX] == DESTROYED_PART_CHAR_ID)
 			return false;
 		return true;
 	}
@@ -153,8 +167,8 @@ struct Ship {
 		return sqrt(pow(abs(y1 - y2), 2) + pow(abs(x1 - x2), 2));
 	}
 
-	int canShoot(int enemyX, int enemyY) {
-		if (partsState[1] == DESTROYED_PART_CHAR_ID)
+	int prepareShooting(int enemyX, int enemyY) {
+		if (partsState[CANNON_INDEX] == DESTROYED_PART_CHAR_ID)
 			return Result.cannonDestroyed;
 		if (shootsRemaining <= 0)
 			return Result.tooManyShoots;
@@ -174,9 +188,21 @@ struct Ship {
 			shootsRemaining--;
 			return Result.success;
 		}
-			
-		return Result.shootTooFar;
 
+		return Result.shootTooFar;
+	}
+
+	int prepareSendingPlane(int planeX, int planeY) {
+		if (partsState[CANNON_INDEX] == DESTROYED_PART_CHAR_ID)
+			return Result.cannonPlaneDestroyed;
+		if (shootsRemaining <= 0)
+			return Result.tooManyPlanes;
+		shootsRemaining--;
+
+		planesCoords[planesSend][0] = planeX;
+		planesCoords[planesSend][1] = planeY;
+		planesSend++;
+		return Result.success;
 	}
 
 	Ship(int n_x, int n_y, int n_direction, int n_shipTypeId, int n_shipId, char* n_partsStates) {
@@ -186,6 +212,7 @@ struct Ship {
 		shipTypeId = n_shipTypeId;
 		shipId = n_shipId;
 		shipLength = getShipLength(shipTypeId);
+		ENGINE_INDEX = shipLength - 1;
 		strncpy_s(partsState, sizeof(char) * (SHIP_PART_STATES_LENGTH), n_partsStates, shipLength + 1);
 		resetTurn();
 	}

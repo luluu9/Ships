@@ -18,6 +18,7 @@ int getCommandId(char* command) {
 	if (strcmp(command, "SRAND") == 0) return SRAND;
 	if (strcmp(command, "SAVE") == 0) return SAVE;
 	if (strcmp(command, "MOVE") == 0) return MOVE;
+	if (strcmp(command, "SPY") == 0) return SPY;
 	std::cout << "GOT BAD COMMAND IN getCommandId FUNCTION" << std::endl;
 	return -1;
 }
