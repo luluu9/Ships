@@ -16,6 +16,8 @@ const char RADAR_CHAR = '@';
 const char CANON_CHAR = '!';
 const char ENGINE_CHAR = '%';
 
+const int ADVANCED_PRINT_MODE = 1;
+
 
 struct Board {
 	int BOARD_WIDTH = DEFAULT_BOARD_WIDTH;
@@ -158,13 +160,6 @@ struct Board {
 		}
 	}
 
-	void printBoardBasic() {
-		for (int y = 0; y < BOARD_HEIGHT; y++) {
-			for (int x = 0; x < BOARD_WIDTH; x++)
-				std::cout << getCell(x, y);
-			std::cout << std::endl;
-		}
-	}
 
 	char getShipPartChar(int x, int y) {
 		Ship* ship = getShipPtr(x, y);
@@ -184,25 +179,6 @@ struct Board {
 		return SHIP_CHAR;
 	}
 
-	void printBoardExtended() {
-		int numOfXChars = (int)log10(BOARD_WIDTH - 1) + 1;
-		int numOfYChars = (int)log10(BOARD_HEIGHT - 1) + 1;
-		char printArg[5];
-		char numChars[MAX_TABLE_DIGITS + sizeof(char)];
-		sprintf_s(printArg, "%%0%dd", numOfXChars);
-		printXHeader(BOARD_WIDTH, numOfXChars, numChars, printArg);
-		sprintf_s(printArg, "%%0%dd", numOfYChars);
-
-		for (int y = 0; y < BOARD_HEIGHT; y++) {
-			sprintf_s(numChars, printArg, y);
-			printf("%s", numChars);
-			for (int x = 0; x < BOARD_WIDTH; x++) {
-				std::cout << getShipPartChar(x, y);
-			}
-			std::cout << std::endl;
-		}
-	}
-
 
 	// COMMANDS
 
@@ -211,11 +187,31 @@ struct Board {
 		int partsRemainingPlayerB = countPartsRemaining(BOB);
 		if (partsRemainingPlayerA == 0 && partsRemainingPlayerB == 0)
 			return;
+		
+		// Preparation of advanced print mode
+		int numOfXChars = (int)log10(BOARD_WIDTH - 1) + 1;
+		int numOfYChars = (int)log10(BOARD_HEIGHT - 1) + 1;
+		char printArg[5];
+		char numChars[MAX_TABLE_DIGITS + sizeof(char)];
+		if (printMode == ADVANCED_PRINT_MODE) {
+			sprintf_s(printArg, "%%0%dd", numOfXChars);
+			printXHeader(BOARD_WIDTH, numOfXChars, numChars, printArg);
+			sprintf_s(printArg, "%%0%dd", numOfYChars);
+		}
 
-		if (printMode == 0)
-			printBoardBasic();
-		else
-			printBoardExtended();
+		for (int y = 0; y < BOARD_HEIGHT; y++) {
+			if (printMode == ADVANCED_PRINT_MODE) {
+				sprintf_s(numChars, printArg, y);
+				printf("%s", numChars);
+			}
+			for (int x = 0; x < BOARD_WIDTH; x++) {
+				if (printMode == ADVANCED_PRINT_MODE)
+					std::cout << getShipPartChar(x, y);
+				else
+					std::cout << getCell(x, y);
+			}
+			std::cout << std::endl;
+		}
 
 		printf("PARTS REMAINING:: A : %d B : %d\n", partsRemainingPlayerA, partsRemainingPlayerB);
 	};
@@ -280,8 +276,22 @@ struct Board {
 					}
 				}
 
+		// Preparation of advanced print mode
+		int numOfXChars = (int)log10(BOARD_WIDTH - 1) + 1;
+		int numOfYChars = (int)log10(BOARD_HEIGHT - 1) + 1;
+		char printArg[5];
+		char numChars[MAX_TABLE_DIGITS + sizeof(char)];
+		if (printMode == ADVANCED_PRINT_MODE) {
+			sprintf_s(printArg, "%%0%dd", numOfXChars);
+			printXHeader(BOARD_WIDTH, numOfXChars, numChars, printArg);
+			sprintf_s(printArg, "%%0%dd", numOfYChars);
+		}
 
 		for (int y = 0; y < BOARD_HEIGHT; y++) {
+			if (printMode == ADVANCED_PRINT_MODE) {
+				sprintf_s(numChars, printArg, y);
+				printf("%s", numChars);
+			}
 			for (int x = 0; x < BOARD_WIDTH; x++) {
 				if (visibleCells[getIndex(x, y)] == true)
 					if (printMode == 0)
