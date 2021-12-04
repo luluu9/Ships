@@ -30,10 +30,12 @@ int handleInput(char* command, int* currentStatePlayer, int* previousStatePlayer
 	static bool stateCommands = false;
 	static bool playerACommands = false;
 	static bool playerBCommands = false;
+
 	int turnEnds = false;
 
-	if (strcmp(command, "[state]") == 0)
+	if (strcmp(command, "[state]") == 0) {
 		stateCommands = !stateCommands; // flip bool
+	}
 	else if (strcmp(command, "[playerA]") == 0) {
 		turnEnds = switchPlayerTurn(ALICE, &playerACommands, currentStatePlayer, previousStatePlayer);
 	}
@@ -54,37 +56,35 @@ int handleInput(char* command, int* currentStatePlayer, int* previousStatePlayer
 		if (extendedShips && commandId == BASE_SHOOT)
 			commandId = EXT_SHOOT;
 
-
 		if (stateCommands && commandId == PRINT)
 			commandId = PRINT_STATE;
 
-
-			// TODO: change this
-			if (stateCommands) {
-				if (commandId == PRINT_STATE ||
-					commandId == SET_FLEET ||
-					commandId == NEXT_PLAYER ||
-					commandId == BOARD_SIZE ||
-					commandId == INIT_POSITION ||
-					commandId == REEF ||
-					commandId == SHIP ||
-					commandId == EXTENDED_SHIPS ||
-					commandId == SET_AI_PLAYER ||
-					commandId == SRAND ||
-					commandId == SAVE
-					)
-					return commandId;
-			}
-			else {
-				if (commandId == PLACE_SHIP ||
-					commandId == BASE_SHOOT ||
-					commandId == EXT_SHOOT ||
-					commandId == MOVE ||
-					commandId == SPY ||
-					commandId == PRINT ||
-					commandId == SAVE)
-					return commandId;
-			}
+		// TODO: change this
+		if (stateCommands) {
+			if (commandId == PRINT_STATE ||
+				commandId == SET_FLEET ||
+				commandId == NEXT_PLAYER ||
+				commandId == BOARD_SIZE ||
+				commandId == INIT_POSITION ||
+				commandId == REEF ||
+				commandId == SHIP ||
+				commandId == EXTENDED_SHIPS ||
+				commandId == SET_AI_PLAYER ||
+				commandId == SRAND ||
+				commandId == SAVE
+				)
+				return commandId;
+		}
+		else {
+			if (commandId == PLACE_SHIP ||
+				commandId == BASE_SHOOT ||
+				commandId == EXT_SHOOT ||
+				commandId == MOVE ||
+				commandId == SPY ||
+				commandId == PRINT ||
+				commandId == SAVE)
+				return commandId;
+		}
 	}
 
 	if (turnEnds)
@@ -154,7 +154,10 @@ int main() {
 
 	char command[COMMAND_MAX_CHARS], fullCommand[COMMAND_MAX_CHARS];
 	int currentStatePlayer = -2, previousStatePlayer = -1;
+	int AIPlayerId = -1;
 	bool extendedShips = false;
+	int seed = 0; // default rand seed
+	srand(seed);
 
 	while (std::cin >> command) {
 		switch (handleInput(command, &currentStatePlayer, &previousStatePlayer, extendedShips)) {
@@ -181,7 +184,12 @@ int main() {
 		case NEXT_PLAYER: {
 			char playerInitials;
 			std::cin >> playerInitials;
-			// playerDoingTurn = getPlayerId(playerInitials);
+
+			int playerDoingNextTurn = getPlayerId(playerInitials);
+			// in switchTurn function we change currentStatePlayer to next
+			// so we have to set currentStatePlayer to previous player 
+			previousStatePlayer = currentStatePlayer;
+			currentStatePlayer = (playerDoingNextTurn - 1) % NUMBER_OF_PLAYERS;
 			break;
 		}
 		case PLACE_SHIP: {
@@ -309,6 +317,17 @@ int main() {
 			board->save(nextPlayer);
 			break;
 		}
+		case SET_AI_PLAYER: {
+			char playerInitials;
+			std::cin >> playerInitials;
+			AIPlayerId = getPlayerId(playerInitials);
+			break;
+		}
+		case SRAND: {
+			std::cin >> seed;
+			srand(seed);
+			break;
+		}
 		case CLEAR: {
 			board->clearBoard();
 			break;
@@ -327,9 +346,19 @@ int main() {
 			for (int i = 0; i < NUMBER_OF_PLAYERS; i++) {
 				Players[i].availableFleet->resetMoves();
 			}
+
+			// currentStatePlayer ends turn so check 
+			// if next playerId == AIPlayerId
+			int nextPlayer = (currentStatePlayer + 1) % NUMBER_OF_PLAYERS;
+			if (AIPlayerId == nextPlayer) {
+				AITurn(board, currentStatePlayer);
+			}
 			break;
 		}
 		case DO_NOTHING: {
+			if (AIPlayerId == currentStatePlayer) {
+				AITurn(board, currentStatePlayer);
+			}
 			break;
 		}
 		default:

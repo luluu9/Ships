@@ -14,3 +14,4 @@ int extendedShoot(Board* board, Ship* shootingShip, int x, int y);
 int spy(Board* board, Ship* sendingPlaneShip, int x, int y);
 int move(Board* board, Player* player, Ship* ship, int moveDirection);
 void setFleet(Player* player);
+void AITurn(Board* board, int currentStatePlayer);

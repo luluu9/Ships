@@ -300,3 +300,8 @@ void setFleet(Player* player) {
 	}
 }
 
+
+void AITurn(Board* board, int currentStatePlayer) {
+	int nextPlayer = (currentStatePlayer + 1) % NUMBER_OF_PLAYERS;
+	board->save(nextPlayer);
+}

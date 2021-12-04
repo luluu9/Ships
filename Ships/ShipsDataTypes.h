@@ -7,7 +7,7 @@ enum COMMANDS {
 	PRINT, SET_FLEET, NEXT_PLAYER, PLACE_SHIP, BASE_SHOOT, CLEAR, // BASIC
 	BOARD_SIZE, INIT_POSITION, REEF, SHIP, EXTENDED_SHIPS,		  // EXTENDED
 	SET_AI_PLAYER, /*PRINT,*/ SRAND, SAVE, MOVE, EXT_SHOOT,		  // --------
-	PRINT_STATE, SPY												  // --------
+	PRINT_STATE, SPY										      // --------
 };
 enum DIRECTIONS { NORTH, EAST, SOUTH, WEST };
 enum PLAYERS { ALICE, BOB }; // [A]lice = 0, [B]ob = 1
