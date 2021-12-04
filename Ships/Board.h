@@ -172,10 +172,10 @@ struct Board {
 		int distanceToBow = ship->calcDistance(shipX, x, shipY, y);
 		if (distanceToBow == 0)
 			return RADAR_CHAR;
-		if (distanceToBow == ship->shipLength-1)
+		if (distanceToBow == ship->shipLength - 1)
 			return ENGINE_CHAR;
 		if (distanceToBow == 1)
-			return CANON_CHAR;		
+			return CANON_CHAR;
 		return SHIP_CHAR;
 	}
 
@@ -187,7 +187,7 @@ struct Board {
 		int partsRemainingPlayerB = countPartsRemaining(BOB);
 		if (partsRemainingPlayerA == 0 && partsRemainingPlayerB == 0)
 			return;
-		
+
 		// Preparation of advanced print mode
 		int numOfXChars = (int)log10(BOARD_WIDTH - 1) + 1;
 		int numOfYChars = (int)log10(BOARD_HEIGHT - 1) + 1;
@@ -368,6 +368,39 @@ struct Board {
 		setCell(x, y, REEF_CHAR);
 	};
 
+	void save(int nextPlayer) {
+		printf_s("[state]\n");
+		printf_s("BOARD_SIZE %d %d\n", BOARD_HEIGHT, BOARD_WIDTH);
+		printf_s("NEXT_PLAYER %c\n", getPlayerInitials(nextPlayer));
+		for (int playerId = ALICE; playerId <= BOB; playerId++) {
+			char playerInitials = getPlayerInitials(playerId);
+			printf_s("INIT_POSITION %c ", playerInitials);
+			printf_s("%d %d ", playersRectangle[playerId][minYInd], playersRectangle[playerId][minXInd]);
+			printf_s("%d %d ", playersRectangle[playerId][maxYInd], playersRectangle[playerId][maxXInd]);
+			printf_s("\n");
+			printf_s("SET_FLEET %c ", playerInitials);
+			for (int shipTypeId = CARRIER; shipTypeId <= DESTROYER; shipTypeId++) {
+				int shipsNumber = players[playerId].availableFleet->shipsNumber[shipTypeId];
+				printf_s("%d ", shipsNumber);
+			}
+			printf_s("\n");
+			Fleet* fleet = players[playerId].availableFleet;
+			for (int i = 0; i < NUMBER_OF_SHIP_TYPES; i++)
+				for (int j = 0; j < MAX_NUMBER_OF_SHIPS; j++)
+					if (fleet->ships[i][j] != nullptr) {
+						Ship* ship = fleet->ships[i][j];
+						printf_s("SHIP %c %d %d %c %d %s %s\n",
+							playerInitials, ship->y, ship->x,
+							getDirectionChar(ship->direction),
+							ship->shipId,
+							getShipTypeAbbrv(ship->shipTypeId),
+							ship->getPartsState()
+						);
+					}
+
+		}
+		std::cout << "[state]" << std::endl;
+	}
 
 	// DESTRUCTOR
 

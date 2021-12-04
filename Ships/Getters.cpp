@@ -19,6 +19,7 @@ int getCommandId(char* command) {
 	if (strcmp(command, "SAVE") == 0) return SAVE;
 	if (strcmp(command, "MOVE") == 0) return MOVE;
 	if (strcmp(command, "SPY") == 0) return SPY;
+	if (strcmp(command, "SAVE") == 0) return SAVE;
 	std::cout << "GOT BAD COMMAND IN getCommandId FUNCTION" << std::endl;
 	return -1;
 }
@@ -67,4 +68,28 @@ int getMoveDirectionId(char moveChar) {
 	if (moveChar == 'R') return RIGHT;
 	std::cout << "GOT BAD MOVE CHAR IN getMoveDirectionId FUNCTION" << std::endl;
 	return -1;
+}
+
+const char* getShipTypeAbbrv(int shipTypeId) {
+	if (shipTypeId == CARRIER) return "CAR";
+	if (shipTypeId == BATTLESHIP) return "BAT";
+	if (shipTypeId == CRUISER) return "CRU";
+	if (shipTypeId == DESTROYER) return "DES";
+	return "?";
+}
+
+const char getPlayerInitials(int playerId) {
+	if (playerId == ALICE)
+		return 'A';
+	else if (playerId == BOB)
+		return 'B';
+	return '?';
+}
+
+const char getDirectionChar(int directionId) {
+	if (directionId == NORTH) return 'N';
+	if (directionId == EAST) return 'E';
+	if (directionId == SOUTH) return 'S';
+	if (directionId == WEST) return 'W';
+	return '?';
 }

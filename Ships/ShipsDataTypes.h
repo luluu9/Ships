@@ -205,6 +205,12 @@ struct Ship {
 		return Result.success;
 	}
 
+	char* getPartsState() {
+		char* truncatedPartsState = new char[shipLength + 1];
+		strncpy_s(truncatedPartsState, sizeof(char)*(shipLength+1), partsState, shipLength);
+		return truncatedPartsState;
+	}
+
 	Ship(int n_x, int n_y, int n_direction, int n_shipTypeId, int n_shipId, char* n_partsStates) {
 		x = n_x;
 		y = n_y;

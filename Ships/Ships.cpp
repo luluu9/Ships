@@ -81,7 +81,8 @@ int handleInput(char* command, int* currentStatePlayer, int* previousStatePlayer
 					commandId == EXT_SHOOT ||
 					commandId == MOVE ||
 					commandId == SPY ||
-					commandId == PRINT)
+					commandId == PRINT ||
+					commandId == SAVE)
 					return commandId;
 			}
 	}
@@ -152,7 +153,7 @@ int main() {
 	board->prepareBoard(Players);
 
 	char command[COMMAND_MAX_CHARS], fullCommand[COMMAND_MAX_CHARS];
-	int currentStatePlayer = -1, previousStatePlayer = -2;
+	int currentStatePlayer = -2, previousStatePlayer = -1;
 	bool extendedShips = false;
 
 	while (std::cin >> command) {
@@ -303,7 +304,11 @@ int main() {
 			extendedShips = !extendedShips;
 			break;
 		}
-
+		case SAVE: {
+			int nextPlayer = (currentStatePlayer + 1) % NUMBER_OF_PLAYERS;
+			board->save(nextPlayer);
+			break;
+		}
 		case CLEAR: {
 			board->clearBoard();
 			break;
