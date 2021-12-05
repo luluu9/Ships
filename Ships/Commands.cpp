@@ -144,7 +144,7 @@ int move(Board* board, Player* player, Ship* ship, int moveDirection) {
 	else if (ship->direction == WEST) endX = ship->x + shipLength - 1;
 	else return Result.undefined;
 
-	// make sure that startPos is smaller or equal to endPos
+	// make sure that startPos is smaller to endPos
 	if (startX > endX) std::swap(startX, endX);
 	if (startY > endY) std::swap(startY, endY);
 
@@ -236,7 +236,6 @@ int move(Board* board, Player* player, Ship* ship, int moveDirection) {
 			board->setCell(currentX, currentY, EMPTY_CELL);
 		}
 
-	// checkPlace doesnt work, because it detected old position of ship
 	int cellsContent = board->checkPlace(player->id, newStartX, newEndX, newStartY, newEndY);
 	if (cellsContent != EMPTY_CELLS) {
 		delete[] shipPartsChars;

@@ -189,7 +189,7 @@ int main() {
 			// in switchTurn function we change currentStatePlayer to next
 			// so we have to set currentStatePlayer to previous player 
 			previousStatePlayer = currentStatePlayer;
-			currentStatePlayer = (playerDoingNextTurn - 1) % NUMBER_OF_PLAYERS;
+			currentStatePlayer = (playerDoingNextTurn + 1) % NUMBER_OF_PLAYERS;
 			break;
 		}
 		case PLACE_SHIP: {
