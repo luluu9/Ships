@@ -11,7 +11,7 @@ int placeShip(
 int shoot(Board* board, Player players[2], int x, int y, bool extendedShips, Ship* shootingShip = nullptr);
 int basicShoot(Board* board, int x, int y);
 int extendedShoot(Board* board, Ship* shootingShip, int x, int y);
-int spy(Board* board, Ship* sendingPlaneShip, int x, int y);
+int spy(Ship* sendingPlaneShip, int x, int y);
 int move(Board* board, Player* player, Ship* ship, int moveDirection);
 void setFleet(Player* player);
 void save(Board* board, int nextPlayer, bool extendedShips, int AIPlayerId, int seed);

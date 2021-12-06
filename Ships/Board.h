@@ -163,7 +163,7 @@ struct Board {
 	}
 
 
-	char getShipPartChar(int x, int y) {
+	char getShipPartChar(int x, int y) const {
 		Ship* ship = getShipPtr(x, y);
 		if (ship == nullptr)
 			return EMPTY_CELL;
@@ -171,7 +171,7 @@ struct Board {
 			return DAMAGED_CHAR;
 		int shipX = ship->x;
 		int shipY = ship->y;
-		int distanceToBow = ship->calcDistance(shipX, x, shipY, y);
+		int distanceToBow = (int)ship->calcDistance(shipX, x, shipY, y);
 		if (distanceToBow == 0)
 			return RADAR_CHAR;
 		if (distanceToBow == ship->shipLength - 1)
@@ -219,14 +219,11 @@ struct Board {
 	};
 
 	void printPlayerBoard(int printMode, Player* player) {
-		//printf("%s", player->id == 0 ? "ALICE" : "BOB");
-
 		bool* visibleCells = new bool[BOARD_WIDTH * BOARD_HEIGHT];
 		for (int y = 0; y < BOARD_HEIGHT; y++)
 			for (int x = 0; x < BOARD_WIDTH; x++)
 				visibleCells[getIndex(x, y)] = false;
 
-		Ship* (*ships)[NUMBER_OF_SHIP_TYPES][MAX_NUMBER_OF_SHIPS] = &player->availableFleet->ships;
 		for (int i = 0; i < NUMBER_OF_SHIP_TYPES; i++)
 			for (int j = 0; j < MAX_NUMBER_OF_SHIPS; j++)
 				if (player->availableFleet->ships[i][j] != nullptr) {
@@ -266,9 +263,9 @@ struct Board {
 						}
 
 					// make visible cells in range of planes
-					for (int i = 0; i < planesSend; i++) {
-						int planeX = ship->planesCoords[i][0];
-						int planeY = ship->planesCoords[i][1];
+					for (int k = 0; k < planesSend; k++) {
+						int planeX = ship->planesCoords[k][0];
+						int planeY = ship->planesCoords[k][1];
 						for (int x = planeX - 1; x <= planeX + 1; x++)
 							for (int y = planeY - 1; y <= planeY + 1; y++) {
 								if (!isPointInside(x, y))

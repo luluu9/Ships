@@ -120,7 +120,7 @@ int shoot(Board* board, Player players[2], int x, int y, bool extendedShips, Shi
 }
 
 
-int spy(Board* board, Ship* sendingPlaneShip, int x, int y) {
+int spy(Ship* sendingPlaneShip, int x, int y) {
 	int result = sendingPlaneShip->prepareSendingPlane(x, y);
 	return result;
 }
@@ -345,7 +345,7 @@ void save(Board* board, int nextPlayer, bool extendedShips, int AIPlayerId, int 
 		printf_s("EXTENDED_SHIPS\n");
 	if (AIPlayerId != -1)
 		printf_s("SET_AI_PLAYER %c\n", getPlayerInitials(AIPlayerId));
-	if (seed != -1)
+	if (seed != 0)
 		printf_s("SEED %d\n", seed + 1);
 	printf_s("[state]\n");
 }

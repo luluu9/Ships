@@ -92,7 +92,6 @@ struct Ship {
 	int shipId;
 	int movesRemaining = DEFAULT_SHIPS_MOVES;
 	int shootsRemaining;
-	int planesRemaining;
 	int shipLength;
 	char partsState[SHIP_PART_STATES_LENGTH] = {};
 
@@ -100,7 +99,7 @@ struct Ship {
 	const int RADAR_INDEX = 1;
 	int ENGINE_INDEX = 1;
 
-	int planesCoords[CARRIER_LENGTH][2];
+	int planesCoords[CARRIER_LENGTH][2] = {};
 	int planesSend = 0;
 
 	//// should these commands be there or in Commands.cpp file?

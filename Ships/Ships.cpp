@@ -160,7 +160,7 @@ int main() {
 	int AIPlayerId = -1;
 	bool AITurnAfterState = false;
 	bool extendedShips = false;
-	int seed = -1; // default rand seed
+	int seed = 0; // default rand seed
 	srand(seed);
 
 	while (std::cin >> command) {
@@ -239,7 +239,7 @@ int main() {
 			Ship* sendingPlaneShip = Players[currentStatePlayer].availableFleet->getShip(shipId, CARRIER);
 
 			sprintf_s(fullCommand, "SPY %d %d %d", shipId, y, x);
-			int result = spy(board, sendingPlaneShip, x, y);
+			int result = spy(sendingPlaneShip, x, y);
 			handleResult(SPY, result, fullCommand);
 			break;
 		}
