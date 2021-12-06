@@ -356,13 +356,13 @@ int main() {
 			}
 			break;
 		}
-		case DO_NOTHING: {
-			break;
-		}
 		case AI_TURN: {
 			if (AIPlayerId == playerDoingNextTurn) {
 				AITurn(board, Players, AIPlayerId, extendedShips);
 			}
+			break;
+		}
+		case DO_NOTHING: {
 			break;
 		}
 		default:

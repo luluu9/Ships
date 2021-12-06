@@ -126,30 +126,9 @@ int spy(Board* board, Ship* sendingPlaneShip, int x, int y) {
 }
 
 
-int move(Board* board, Player* player, Ship* ship, int moveDirection) {
-	// TODO:
-	// engine check
-	if (ship->movesRemaining <= 0) return Result.shipNoMoves;
-
-	int shipLength = getShipLength(ship->shipTypeId);
-	int startX, endX, startY, endY;
-	startY = endY = ship->y;
-	startX = endX = ship->x;
-
-	// -1 because startY takes one cell
-	if (ship->direction == NORTH) endY = ship->y + shipLength - 1;
-	else if (ship->direction == SOUTH) endY = ship->y - shipLength + 1;
-	else if (ship->direction == EAST) endX = ship->x - shipLength + 1;
-	else if (ship->direction == WEST) endX = ship->x + shipLength - 1;
-	else return Result.undefined;
-
-	// make sure that startPos is smaller to endPos
-	if (startX > endX) std::swap(startX, endX);
-	if (startY > endY) std::swap(startY, endY);
-
-	int newStartX = startX, newEndX = endX,
-		newStartY = startY, newEndY = endY;
-
+void calcNewPosition(Ship* ship, int moveDirection,
+	int& newStartX, int& newStartY, int& newEndX, int& newEndY,
+	int startX, int startY, int  endX, int  endY) {
 	if (moveDirection == FORWARD) {
 		if (ship->direction == NORTH) {
 			newStartY = startY - 1;
@@ -171,58 +150,87 @@ int move(Board* board, Player* player, Ship* ship, int moveDirection) {
 	else if (moveDirection == RIGHT) {
 		if (ship->direction == NORTH) {
 			newEndY = newStartY = startY + 1;
-			newStartX = startX + shipLength - 1;
+			newStartX = startX + ship->shipLength - 1;
 			newEndX = startX;
 			ship->direction = EAST;
 		}
 		else if (ship->direction == SOUTH) {
 			newEndY = newStartY = startY - 1;
-			newStartX = startX - shipLength + 1;
+			newStartX = startX - ship->shipLength + 1;
 			newEndX = startX;
 			ship->direction = WEST;
 		}
 		else if (ship->direction == EAST) {
 			newEndX = newStartX = startX + 1;
 			newEndY = endY;
-			newStartY = endY + shipLength - 1;
+			newStartY = endY + ship->shipLength - 1;
 			ship->direction = SOUTH;
 		}
 		else if (ship->direction == WEST) {
 			newEndX = newStartX = startX - 1;
 			newEndY = endY;
-			newStartY = endY - shipLength + 1;
+			newStartY = endY - ship->shipLength + 1;
 			ship->direction = NORTH;
 		}
 	}
 	else if (moveDirection == LEFT) {
 		if (ship->direction == NORTH) {
 			newEndY = newStartY = startY + 1;
-			newStartX = startX - shipLength + 1;
+			newStartX = startX - ship->shipLength + 1;
 			newEndX = startX;
 			ship->direction = WEST;
 		}
 		else if (ship->direction == SOUTH) {
 			newEndY = newStartY = startY - 1;
-			newStartX = startX + shipLength - 1;
+			newStartX = startX + ship->shipLength - 1;
 			newEndX = startX;
 			ship->direction = EAST;
 		}
 		else if (ship->direction == EAST) {
 			newEndX = newStartX = startX + 1;
 			newEndY = endY;
-			newStartY = endY - shipLength + 1;
+			newStartY = endY - ship->shipLength + 1;
 			ship->direction = NORTH;
 		}
 		else if (ship->direction == WEST) {
 			newEndX = newStartX = startX - 1;
 			newEndY = endY;
-			newStartY = endY + shipLength - 1;
+			newStartY = endY + ship->shipLength - 1;
 			ship->direction = SOUTH;
 		}
 	}
 
 	if (newStartX > newEndX) std::swap(newStartX, newEndX);
 	if (newStartY > newEndY) std::swap(newStartY, newEndY);
+}
+
+
+int move(Board* board, Player* player, Ship* ship, int moveDirection) {
+	if (ship->movesRemaining <= 0) return Result.shipNoMoves;
+	if (!ship->engineWorks()) return Result.shipBrokenEngine;
+
+	int shipLength = getShipLength(ship->shipTypeId);
+	int startX, endX, startY, endY;
+	startY = endY = ship->y;
+	startX = endX = ship->x;
+
+	// -1 because startY takes one cell
+	if (ship->direction == NORTH) endY = ship->y + shipLength - 1;
+	else if (ship->direction == SOUTH) endY = ship->y - shipLength + 1;
+	else if (ship->direction == EAST) endX = ship->x - shipLength + 1;
+	else if (ship->direction == WEST) endX = ship->x + shipLength - 1;
+	else return Result.undefined;
+
+	// make sure that startPos is smaller to endPos
+	if (startX > endX) std::swap(startX, endX);
+	if (startY > endY) std::swap(startY, endY);
+
+	int newStartX = startX, newEndX = endX,
+		newStartY = startY, newEndY = endY;
+
+	calcNewPosition(ship, moveDirection,
+		newStartX, newStartY, newEndX, newEndY,
+		startX, startY, endX, endY);
 
 	// firstly, we have to clear previous ship cells
 	// and read states of the ship parts
