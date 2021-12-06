@@ -26,6 +26,8 @@ struct Board {
 	// array of pointers to ships on corresponding cells
 	void** shipCells = new void* [BOARD_WIDTH * BOARD_HEIGHT];
 	Player* players;
+	int* reefs = new int[BOARD_HEIGHT * BOARD_WIDTH * 2];
+	int reefsAmount = 0;
 
 	// Player's rectangle allows Player to place ships in specified area (inclusive)
 	enum rectangleIndexes { minXInd, minYInd, maxXInd, maxYInd };
@@ -366,41 +368,10 @@ struct Board {
 
 	void setReef(int x, int y) {
 		setCell(x, y, REEF_CHAR);
+		reefs[reefsAmount * 2] = x;
+		reefs[reefsAmount * 2 + 1] = y;
+		reefsAmount++;
 	};
-
-	void save(int nextPlayer) {
-		printf_s("[state]\n");
-		printf_s("BOARD_SIZE %d %d\n", BOARD_HEIGHT, BOARD_WIDTH);
-		printf_s("NEXT_PLAYER %c\n", getPlayerInitials(nextPlayer));
-		for (int playerId = ALICE; playerId <= BOB; playerId++) {
-			char playerInitials = getPlayerInitials(playerId);
-			printf_s("INIT_POSITION %c ", playerInitials);
-			printf_s("%d %d ", playersRectangle[playerId][minYInd], playersRectangle[playerId][minXInd]);
-			printf_s("%d %d ", playersRectangle[playerId][maxYInd], playersRectangle[playerId][maxXInd]);
-			printf_s("\n");
-			printf_s("SET_FLEET %c ", playerInitials);
-			for (int shipTypeId = CARRIER; shipTypeId <= DESTROYER; shipTypeId++) {
-				int shipsNumber = players[playerId].availableFleet->shipsNumber[shipTypeId];
-				printf_s("%d ", shipsNumber);
-			}
-			printf_s("\n");
-			Fleet* fleet = players[playerId].availableFleet;
-			for (int i = 0; i < NUMBER_OF_SHIP_TYPES; i++)
-				for (int j = 0; j < MAX_NUMBER_OF_SHIPS; j++)
-					if (fleet->ships[i][j] != nullptr) {
-						Ship* ship = fleet->ships[i][j];
-						printf_s("SHIP %c %d %d %c %d %s %s\n",
-							playerInitials, ship->y, ship->x,
-							getDirectionChar(ship->direction),
-							ship->shipId,
-							getShipTypeAbbrv(ship->shipTypeId),
-							ship->getPartsState()
-						);
-					}
-
-		}
-		std::cout << "[state]" << std::endl;
-	}
 
 	// DESTRUCTOR
 
