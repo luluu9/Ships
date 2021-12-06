@@ -129,7 +129,6 @@ int spy(Board* board, Ship* sendingPlaneShip, int x, int y) {
 int move(Board* board, Player* player, Ship* ship, int moveDirection) {
 	// TODO:
 	// engine check
-	// too close check
 	if (ship->movesRemaining <= 0) return Result.shipNoMoves;
 
 	int shipLength = getShipLength(ship->shipTypeId);
@@ -300,7 +299,59 @@ void setFleet(Player* player) {
 }
 
 
-void AITurn(Board* board, int currentStatePlayer) {
-	int nextPlayer = (currentStatePlayer + 1) % NUMBER_OF_PLAYERS;
+void AITurn(Board* board, Player players[NUMBER_OF_PLAYERS], int playerId, bool extendedShips) {
+	Player* player = &players[playerId];
+	// A.I. can position the ships on the board in accordance to the rules, it should do this randomly.
+	Fleet* fleet = player->availableFleet;
+	for (int shipTypeId = 0; shipTypeId < NUMBER_OF_SHIP_TYPES; shipTypeId++) {
+		while (fleet->remainingShips[shipTypeId] > 0) {
+			int x, y, shipId, direction;
+			char* partsState = (char*)"11111";
+			do {
+				int minX = board->playersRectangle[playerId][0];
+				int minY = board->playersRectangle[playerId][1];
+				int maxX = board->playersRectangle[playerId][2];
+				int maxY = board->playersRectangle[playerId][3];
+				x = minX + rand() % (maxX - minX);
+				y = minY + rand() % (maxY - minY);
+				shipId = fleet->shipsNumber[shipTypeId] - fleet->remainingShips[shipTypeId];
+				direction = rand() % 4;
+			} while (placeShip(board, player, x, y, shipId, direction, shipTypeId, partsState) != Result.success);
+		}
+	}
+
+	// A.I. can shoot at the fields randomly, but it avoids shooting at it's own units / reefs; moreover if an enemy ship can be shoot at it does so.
+	for (int shipTypeId = 0; shipTypeId < NUMBER_OF_SHIP_TYPES; shipTypeId++) {
+		for (int shipId = 0; shipId < MAX_NUMBER_OF_SHIPS; shipId++) {
+			Ship* ship = fleet->ships[shipTypeId][shipId];
+			if (ship != nullptr) {
+				int shootResult;
+				do {
+					int x = rand() % board->BOARD_WIDTH;
+					int y = rand() % board->BOARD_HEIGHT;
+					shootResult = shoot(board, players, x, y, extendedShips, ship);
+				} while (shootResult == Result.shootTooFar);
+			}
+		}
+	}
+
+	// A.I.can randomly move the ships.
+	for (int shipTypeId = 0; shipTypeId < NUMBER_OF_SHIP_TYPES; shipTypeId++) {
+		for (int shipId = 0; shipId < MAX_NUMBER_OF_SHIPS; shipId++) {
+			Ship* ship = fleet->ships[shipTypeId][shipId];
+			if (ship != nullptr) {
+				int result;
+				do {
+					int moveDirection = LEFT + rand() % 3;
+					result = move(board, player, ship, moveDirection);
+				} while (result != Result.shipNoMoves);
+			}
+		}
+	}
+
+	// print state
+	int nextPlayer = (playerId + 1) % NUMBER_OF_PLAYERS;
 	board->save(nextPlayer);
+
+	exit(0);
 }

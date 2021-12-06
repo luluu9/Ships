@@ -26,15 +26,17 @@ bool switchPlayerTurn(int currentCommandPlayerId, bool* playerCommandsToChange, 
 }
 
 
-int handleInput(char* command, int* currentStatePlayer, int* previousStatePlayer, bool extendedShips) {
+int handleInput(char* command, int* currentStatePlayer, int* previousStatePlayer, bool extendedShips, bool AITurnAfterState=false) {
 	static bool stateCommands = false;
 	static bool playerACommands = false;
 	static bool playerBCommands = false;
 
 	int turnEnds = false;
-
+	
 	if (strcmp(command, "[state]") == 0) {
 		stateCommands = !stateCommands; // flip bool
+		if (AITurnAfterState)
+			return AI_TURN;
 	}
 	else if (strcmp(command, "[playerA]") == 0) {
 		turnEnds = switchPlayerTurn(ALICE, &playerACommands, currentStatePlayer, previousStatePlayer);
@@ -154,13 +156,15 @@ int main() {
 
 	char command[COMMAND_MAX_CHARS], fullCommand[COMMAND_MAX_CHARS];
 	int currentStatePlayer = -2, previousStatePlayer = -1;
+	int playerDoingNextTurn = -2;
 	int AIPlayerId = -1;
+	bool AITurnAfterState = false;
 	bool extendedShips = false;
 	int seed = 0; // default rand seed
 	srand(seed);
 
 	while (std::cin >> command) {
-		switch (handleInput(command, &currentStatePlayer, &previousStatePlayer, extendedShips)) {
+		switch (handleInput(command, &currentStatePlayer, &previousStatePlayer, extendedShips, AITurnAfterState)) {
 		case PRINT: {
 			int printMode;
 			std::cin >> printMode;
@@ -184,12 +188,8 @@ int main() {
 		case NEXT_PLAYER: {
 			char playerInitials;
 			std::cin >> playerInitials;
-
-			int playerDoingNextTurn = getPlayerId(playerInitials);
-			// in switchTurn function we change currentStatePlayer to next
-			// so we have to set currentStatePlayer to previous player 
-			previousStatePlayer = currentStatePlayer;
-			currentStatePlayer = (playerDoingNextTurn + 1) % NUMBER_OF_PLAYERS;
+			playerDoingNextTurn = getPlayerId(playerInitials);
+			previousStatePlayer = (playerDoingNextTurn + 1) % 2;
 			break;
 		}
 		case PLACE_SHIP: {
@@ -321,6 +321,7 @@ int main() {
 			char playerInitials;
 			std::cin >> playerInitials;
 			AIPlayerId = getPlayerId(playerInitials);
+			AITurnAfterState = true;
 			break;
 		}
 		case SRAND: {
@@ -351,13 +352,16 @@ int main() {
 			// if next playerId == AIPlayerId
 			int nextPlayer = (currentStatePlayer + 1) % NUMBER_OF_PLAYERS;
 			if (AIPlayerId == nextPlayer) {
-				AITurn(board, currentStatePlayer);
+				AITurn(board, Players, nextPlayer, extendedShips);
 			}
 			break;
 		}
 		case DO_NOTHING: {
-			if (AIPlayerId == currentStatePlayer) {
-				AITurn(board, currentStatePlayer);
+			break;
+		}
+		case AI_TURN: {
+			if (AIPlayerId == playerDoingNextTurn) {
+				AITurn(board, Players, AIPlayerId, extendedShips);
 			}
 			break;
 		}
