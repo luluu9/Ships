@@ -83,7 +83,6 @@ static const struct Result {
 		cannonPlaneDestroyed = 0, tooManyPlanes = 1						   // PLANE_RESULTS
 	};
 
-
 } Result;
 
 

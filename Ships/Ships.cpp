@@ -160,7 +160,7 @@ int main() {
 	int AIPlayerId = -1;
 	bool AITurnAfterState = false;
 	bool extendedShips = false;
-	int seed = 0; // default rand seed
+	int seed = -1; // default rand seed
 	srand(seed);
 
 	while (std::cin >> command) {
@@ -314,7 +314,7 @@ int main() {
 		}
 		case SAVE: {
 			int nextPlayer = (currentStatePlayer + 1) % NUMBER_OF_PLAYERS;
-			board->save(nextPlayer);
+			save(board, nextPlayer, extendedShips, AIPlayerId, seed);
 			break;
 		}
 		case SET_AI_PLAYER: {
@@ -351,15 +351,13 @@ int main() {
 			// currentStatePlayer ends turn so check 
 			// if next playerId == AIPlayerId
 			int nextPlayer = (currentStatePlayer + 1) % NUMBER_OF_PLAYERS;
-			if (AIPlayerId == nextPlayer) {
-				AITurn(board, Players, nextPlayer, extendedShips);
-			}
+			if (AIPlayerId == nextPlayer)
+				AITurn(board, Players, nextPlayer, extendedShips, seed);
 			break;
 		}
 		case AI_TURN: {
-			if (AIPlayerId == playerDoingNextTurn) {
-				AITurn(board, Players, AIPlayerId, extendedShips);
-			}
+			if (AIPlayerId == playerDoingNextTurn)
+				AITurn(board, Players, AIPlayerId, extendedShips, seed);
 			break;
 		}
 		case DO_NOTHING: {

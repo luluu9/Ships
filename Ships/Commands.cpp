@@ -252,6 +252,7 @@ int move(Board* board, Player* player, Ship* ship, int moveDirection) {
 			return Result.shipOnReef;
 		else if (cellsContent == OTHER_SHIP_CELLS)
 			return Result.shipTooClose;
+		return Result.undefined;
 	}
 
 
@@ -306,8 +307,51 @@ void setFleet(Player* player) {
 	}
 }
 
+void save(Board* board, int nextPlayer, bool extendedShips, int AIPlayerId, int seed) {
+	printf_s("[state]\n");
+	printf_s("BOARD_SIZE %d %d\n", board->BOARD_HEIGHT, board->BOARD_WIDTH);
+	printf_s("NEXT_PLAYER %c\n", getPlayerInitials(nextPlayer));
+	for (int playerId = ALICE; playerId <= BOB; playerId++) {
+		char playerInitials = getPlayerInitials(playerId);
+		printf_s("INIT_POSITION %c ", playerInitials);
+		printf_s("%d %d ", board->playersRectangle[playerId][board->minYInd], 
+						   board->playersRectangle[playerId][board->minXInd]);
+		printf_s("%d %d ", board->playersRectangle[playerId][board->maxYInd], 
+						   board->playersRectangle[playerId][board->maxXInd]);
+		printf_s("\n");
+		printf_s("SET_FLEET %c ", playerInitials);
+		for (int shipTypeId = CARRIER; shipTypeId <= DESTROYER; shipTypeId++) {
+			int shipsNumber = board->players[playerId].availableFleet->shipsNumber[shipTypeId];
+			printf_s("%d ", shipsNumber);
+		}
+		printf_s("\n");
+		Fleet* fleet = board->players[playerId].availableFleet;
+		for (int i = 0; i < NUMBER_OF_SHIP_TYPES; i++)
+			for (int j = 0; j < MAX_NUMBER_OF_SHIPS; j++)
+				if (fleet->ships[i][j] != nullptr) {
+					Ship* ship = fleet->ships[i][j];
+					printf_s("SHIP %c %d %d %c %d %s %s\n",
+						playerInitials, ship->y, ship->x,
+						getDirectionChar(ship->direction),
+						ship->shipId,
+						getShipTypeAbbrv(ship->shipTypeId),
+						ship->getPartsState()
+					);
+				}
+	}
+	for (int i = 0; i < board->reefsAmount; i++)
+		printf_s("REEF %d %d\n", board->reefs[i * 2 + 1], board->reefs[i * 2]);
+	if (extendedShips)
+		printf_s("EXTENDED_SHIPS\n");
+	if (AIPlayerId != -1)
+		printf_s("SET_AI_PLAYER %c\n", getPlayerInitials(AIPlayerId));
+	if (seed != -1)
+		printf_s("SEED %d\n", seed + 1);
+	printf_s("[state]\n");
+}
 
-void AITurn(Board* board, Player players[NUMBER_OF_PLAYERS], int playerId, bool extendedShips) {
+
+void AITurn(Board* board, Player players[NUMBER_OF_PLAYERS], int playerId, bool extendedShips, int seed) {
 	Player* player = &players[playerId];
 	// A.I. can position the ships on the board in accordance to the rules, it should do this randomly.
 	Fleet* fleet = player->availableFleet;
@@ -359,7 +403,7 @@ void AITurn(Board* board, Player players[NUMBER_OF_PLAYERS], int playerId, bool 
 
 	// print state
 	int nextPlayer = (playerId + 1) % NUMBER_OF_PLAYERS;
-	board->save(nextPlayer);
+	save(board, nextPlayer, extendedShips, playerId, seed);
 
 	exit(0);
 }
