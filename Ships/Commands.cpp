@@ -62,16 +62,14 @@ int placeShip(Board* board, Player* player,
 	char current_char;
 	for (int currentX = startX; currentX <= endX; currentX++)
 		for (int currentY = startY; currentY <= endY; currentY++) {
-			if (direction == NORTH || direction == WEST || direction == EAST)
+			if (direction == NORTH || direction == WEST)
 				current_char = shipPartsStates[currentShipPart] == '1' ? SHIP_CHAR : DAMAGED_CHAR;
-			else // for SOUTH
+			else // for SOUTH and EAST
 				current_char = shipPartsStates[shipLength - 1 - currentShipPart] == '1' ? SHIP_CHAR : DAMAGED_CHAR;
 
 			board->setCell(currentX, currentY, current_char, ship);
 			currentShipPart++;
 		}
-
-	// board->printBoard(0); // debug
 
 	return Result.success;
 }
@@ -346,7 +344,7 @@ void save(Board* board, int nextPlayer, bool extendedShips, int AIPlayerId, int 
 	if (AIPlayerId != -1)
 		printf_s("SET_AI_PLAYER %c\n", getPlayerInitials(AIPlayerId));
 	if (seed != 0)
-		printf_s("SEED %d\n", seed + 1);
+		printf_s("SRAND %d\n", seed + 1);
 	printf_s("[state]\n");
 }
 

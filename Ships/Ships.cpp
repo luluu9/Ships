@@ -61,7 +61,6 @@ int handleInput(char* command, int* currentStatePlayer, int* previousStatePlayer
 		if (stateCommands && commandId == PRINT)
 			commandId = PRINT_STATE;
 
-		// TODO: change this
 		if (stateCommands) {
 			if (commandId == PRINT_STATE ||
 				commandId == SET_FLEET ||
@@ -300,7 +299,6 @@ int main() {
 			Player playerMovingShip = Players[currentStatePlayer];
 			int shipTypeId = getShipTypeId(shipType);
 			int moveDirId = getMoveDirectionId(moveDir);
-			//playerMovingShip.availableFleet->ships[shipTypeId][shipId].move
 			Ship* ship = playerMovingShip.availableFleet->ships[shipTypeId][shipId];
 			int result = move(board, &playerMovingShip, ship, moveDirId);
 

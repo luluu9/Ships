@@ -7,7 +7,7 @@ enum COMMANDS {
 	PRINT, SET_FLEET, NEXT_PLAYER, PLACE_SHIP, BASE_SHOOT, CLEAR, // BASIC
 	BOARD_SIZE, INIT_POSITION, REEF, SHIP, EXTENDED_SHIPS,		  // EXTENDED
 	SET_AI_PLAYER, /*PRINT,*/ SRAND, SAVE, MOVE, EXT_SHOOT,		  // --------
-	PRINT_STATE, SPY, AI_TURN										      // --------
+	PRINT_STATE, SPY, AI_TURN									  // --------
 };
 enum DIRECTIONS { NORTH, EAST, SOUTH, WEST };
 enum PLAYERS { ALICE, BOB }; // [A]lice = 0, [B]ob = 1
@@ -102,20 +102,6 @@ struct Ship {
 	int planesCoords[CARRIER_LENGTH][2] = {};
 	int planesSend = 0;
 
-	//// should these commands be there or in Commands.cpp file?
-	//int placeShip() {
-	//	// pass
-	//}
-
-	//int move(int n_direction) {
-	//	// pass
-	//	return 1;
-	//}
-
-	//int shoot(int n_x, int n_y) {
-	//	// pass
-	//	return 1;
-	//}
 
 	void resetTurn() {
 		if (shipTypeId == CARRIER)
